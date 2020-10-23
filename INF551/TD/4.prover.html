@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram" />
+  <title>Implementing a propositional prover</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Implementing a propositional prover</h1>
+<p class="author">Samuel Mimram</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#type-inference-for-a-simply-typed-calculus"><span class="toc-section-number">1</span> Type inference for a simply typed calculus</a>
+<ul>
+<li><a href="#simple-types"><span class="toc-section-number">1.1</span> Simple types</a></li>
+<li><a href="#λ-terms"><span class="toc-section-number">1.2</span> λ-terms</a></li>
+<li><a href="#string-representation"><span class="toc-section-number">1.3</span> String representation</a></li>
+<li><a href="#type-inference"><span class="toc-section-number">1.4</span> Type inference</a></li>
+<li><a href="#type-checking"><span class="toc-section-number">1.5</span> Type checking</a></li>
+<li><a href="#type-inference-and-checking-together"><span class="toc-section-number">1.6</span> Type inference and checking together</a></li>
+<li><a href="#other-connectives"><span class="toc-section-number">1.7</span> Other connectives</a></li>
+<li><a href="#conjunction"><span class="toc-section-number">1.8</span> Conjunction</a></li>
+<li><a href="#truth"><span class="toc-section-number">1.9</span> Truth</a></li>
+<li><a href="#disjunction"><span class="toc-section-number">1.10</span> Disjunction</a></li>
+<li><a href="#falsity"><span class="toc-section-number">1.11</span> Falsity</a></li>
+<li><a href="#parsing-strings"><span class="toc-section-number">1.12</span> Parsing strings</a></li>
+</ul></li>
+<li><a href="#interactive-prover"><span class="toc-section-number">2</span> Interactive prover</a>
+<ul>
+<li><a href="#string-representation-of-contexts"><span class="toc-section-number">2.1</span> String representation of contexts</a></li>
+<li><a href="#sequents"><span class="toc-section-number">2.2</span> Sequents</a></li>
+<li><a href="#an-interactive-prover"><span class="toc-section-number">2.3</span> An interactive prover</a></li>
+<li><a href="#elimination-of-arrows"><span class="toc-section-number">2.4</span> Elimination of arrows</a></li>
+<li><a href="#proofs-in-files"><span class="toc-section-number">2.5</span> Proofs in files</a></li>
+<li><a href="#full-arrow-elimination"><span class="toc-section-number">2.6</span> Full arrow elimination</a></li>
+<li><a href="#conjunctions"><span class="toc-section-number">2.7</span> Conjunctions</a></li>
+<li><a href="#truth-1"><span class="toc-section-number">2.8</span> Truth</a></li>
+<li><a href="#disjunction-1"><span class="toc-section-number">2.9</span> Disjunction</a></li>
+<li><a href="#falsity-1"><span class="toc-section-number">2.10</span> Falsity</a></li>
+</ul></li>
+<li><a href="#natural-numbers"><span class="toc-section-number">3</span> Natural numbers</a>
+<ul>
+<li><a href="#a-type-for-natural-numbers"><span class="toc-section-number">3.1</span> A type for natural numbers</a></li>
+<li><a href="#introduction-rules"><span class="toc-section-number">3.2</span> Introduction rules</a></li>
+<li><a href="#elimination-rule"><span class="toc-section-number">3.3</span> Elimination rule</a></li>
+</ul></li>
+<li><a href="#optional-small-extensions"><span class="toc-section-number">4</span> Optional: small extensions</a>
+<ul>
+<li><a href="#reduction"><span class="toc-section-number">4.1</span> Reduction</a></li>
+<li><a href="#declarations"><span class="toc-section-number">4.2</span> Declarations</a></li>
+<li><a href="#other-inductive-types"><span class="toc-section-number">4.3</span> Other inductive types</a></li>
+</ul></li>
+<li><a href="#dependent-types"><span class="toc-section-number">5</span> Dependent types</a>
+<ul>
+<li><a href="#expressions"><span class="toc-section-number">5.1</span> Expressions</a></li>
+<li><a href="#string-representation-1"><span class="toc-section-number">5.2</span> String representation</a></li>
+<li><a href="#fresh-variable-names"><span class="toc-section-number">5.3</span> Fresh variable names</a></li>
+<li><a href="#substitution"><span class="toc-section-number">5.4</span> Substitution</a></li>
+<li><a href="#contexts"><span class="toc-section-number">5.5</span> Contexts</a></li>
+<li><a href="#normalization"><span class="toc-section-number">5.6</span> Normalization</a></li>
+<li><a href="#α-conversion"><span class="toc-section-number">5.7</span> α-conversion</a></li>
+<li><a href="#conversion"><span class="toc-section-number">5.8</span> Conversion</a></li>
+<li><a href="#type-inference-1"><span class="toc-section-number">5.9</span> Type inference</a></li>
+<li><a href="#type-checking-1"><span class="toc-section-number">5.10</span> Type checking</a></li>
+<li><a href="#interaction-loop"><span class="toc-section-number">5.11</span> Interaction loop</a></li>
+<li><a href="#natural-numbers-1"><span class="toc-section-number">5.12</span> Natural numbers</a></li>
+<li><a href="#equality"><span class="toc-section-number">5.13</span> Equality</a></li>
+<li><a href="#using-the-prover"><span class="toc-section-number">5.14</span> Using the prover</a></li>
+<li><a href="#optional-inductive-types"><span class="toc-section-number">5.15</span> Optional: inductive types</a></li>
+<li><a href="#optional-interactive-prover"><span class="toc-section-number">5.16</span> Optional: interactive prover</a></li>
+<li><a href="#optional-universes"><span class="toc-section-number">5.17</span> Optional: universes</a></li>
+<li><a href="#optional-better-handling-of-indices"><span class="toc-section-number">5.18</span> Optional: better handling of indices</a></li>
+</ul></li>
+</ul>
+</nav>
+<p><strong>This TD will be noted.</strong> It is quite long, you should finish it at home. That it is noted does not mean that you cannot ask questions, on the contrary: we want to make sure that you have understood the basic concepts of the first part of the course.</p>
+<p>The goal here is to implement a prover for propositional logic which allows to check proofs and easily elaborate those. Your file is supposed to be named <code>prover.ml</code>.</p>
+<h1 data-number="1" id="type-inference-for-a-simply-typed-calculus" data-number="1"><span class="header-section-number">1</span> Type inference for a simply typed calculus</h1>
+<p>We begin by implementing a type checker for the <a href="https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus">simply typed λ-calculus</a>. We respectively define the type of <em>type variables</em> and <em>term variables</em> by</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">(** Type variables. *)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">type</span> tvar = <span class="dt">string</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="co">(** Term variables. *)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a><span class="kw">type</span> var = <span class="dt">string</span></span></code></pre></div>
+<h2 data-number="1.1" id="simple-types" data-number="1.1"><span class="header-section-number">1.1</span> Simple types</h2>
+<p>A <em>simple type</em> is either a type variable or an implication between simple types. Define a type <code class="sourceCode ocaml">ty</code> for simple types.</p>
+<h2 data-number="1.2" id="λ-terms" data-number="1.2"><span class="header-section-number">1.2</span> λ-terms</h2>
+<p>Define a type <code class="sourceCode ocaml">tm</code> for λ-terms à la Church (the variables in abstractions are typed).</p>
+<h2 data-number="1.3" id="string-representation" data-number="1.3"><span class="header-section-number">1.3</span> String representation</h2>
+<p>Define a function <code class="sourceCode ocaml">string_of_ty</code> of type <code class="sourceCode ocaml">ty -&gt; <span class="dt">string</span></code> which gives a string representation of a type. For instance, the representation of the type</p>
+<p><span class="math display">\[
+(A\to B)\to A\to C
+\]</span></p>
+<p>should be</p>
+<pre><code>((A =&gt; B) =&gt; (A =&gt; C))</code></pre>
+<p>Define a function <code class="sourceCode ocaml">string_of_tm</code> of type <code class="sourceCode ocaml">tm -&gt; <span class="dt">string</span></code> which gives a string representation of a term. For instance, the representation of the term</p>
+<p><span class="math display">\[
+λ(f:A\to B).λ(x:A).fx
+\]</span></p>
+<p>should be</p>
+<pre><code>(fun (f : (A =&gt; B)) -&gt; (fun (x : A) -&gt; (f x)))</code></pre>
+<p>(the keyword <code>fun</code> is used here in place of λ). If you want, you can use the following nice UTF-8 symbols in your strings, but you will have to adapt the parser below:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">λ</td>
+<td><code>\u{03bb}</code></td>
+<td style="text-align: left;">∧</td>
+<td><code>\u{2227}</code></td>
+<td style="text-align: left;">⊤</td>
+<td><code>\u{22a4}</code></td>
+<td style="text-align: left;">⇒</td>
+<td><code>\u{21d2}</code></td>
+<td style="text-align: left;">π</td>
+<td><code>\u{03c0}</code></td>
+<td style="text-align: left;">₁</td>
+<td><code>\u{2081}</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Π</td>
+<td><code>\u{03a0}</code></td>
+<td style="text-align: left;">∨</td>
+<td><code>\u{2228}</code></td>
+<td style="text-align: left;">⊥</td>
+<td><code>\u{22a5}</code></td>
+<td style="text-align: left;">¬</td>
+<td><code>\u{00ac}</code></td>
+<td style="text-align: left;">ι</td>
+<td><code>\u{03b9}</code></td>
+<td style="text-align: left;">₂</td>
+<td><code>\u{2082}</code></td>
+</tr>
+</tbody>
+</table>
+<h2 data-number="1.4" id="type-inference" data-number="1.4"><span class="header-section-number">1.4</span> Type inference</h2>
+<p>We define a type for typing contexts by</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">type</span> context = (<span class="dt">string</span> * ty) <span class="dt">list</span></span></code></pre></div>
+<p>and an exception</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="kw">exception</span> Type_error</span></code></pre></div>
+<p>Define a function <code class="sourceCode ocaml">infer_type</code> of type <code class="sourceCode ocaml">context -&gt; tm -&gt; ty</code> which infers the type of a term <span class="math inline">\(t\)</span> in a given context <span class="math inline">\(\Gamma\)</span>: it returns a type <span class="math inline">\(A\)</span> such that <span class="math inline">\(\Gamma\vdash t:A\)</span> is derivable using the usual rules of simply-typed λ-calculus. If no such type exists, it should raise <code class="sourceCode ocaml">Type_error</code>. Test it by ensuring that</p>
+<p><span class="math display">\[
+λ(f:A\to B).λ(g:B\to C).λ(x:A).g(f x)
+\]</span></p>
+<p>has type</p>
+<p><span class="math display">\[
+(A\to B)\to(B\to C)\to A\to C
+\]</span></p>
+<p>Also ensure that the following raise <code class="sourceCode ocaml">Type_error</code> (and not some other exception):</p>
+<ul>
+<li><span class="math inline">\(λ(f:A).x\)</span></li>
+<li><span class="math inline">\(λ(f:A).λ(x:B).fx\)</span></li>
+<li><span class="math inline">\(λ(f:A\to B).λ(x:B).fx\)</span></li>
+</ul>
+<p>We recall that the typing rules are</p>
+<figure>
+<img src="img/stl.svg" class="center" width="280" alt="" /><figcaption>Typing rules</figcaption>
+</figure>
+<p>In the case of the axiom rule, it can be useful to use the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html#VALassoc"><code>List.assoc</code></a> function.</p>
+<h2 data-number="1.5" id="type-checking" data-number="1.5"><span class="header-section-number">1.5</span> Type checking</h2>
+<p>Define a function <code class="sourceCode ocaml">check_type</code> of type <code class="sourceCode ocaml">context -&gt; tm -&gt; ty -&gt; <span class="dt">bool</span></code> which checks whether a term has a given type. Test that</p>
+<ul>
+<li><span class="math inline">\(λ(x:A).x\)</span> has type <span class="math inline">\(A\to A\)</span>,</li>
+<li><span class="math inline">\(λ(x:A).x\)</span> does not have type <span class="math inline">\(B\to B\)</span>,</li>
+<li><span class="math inline">\(x\)</span> does not have type <span class="math inline">\(A\)</span>.</li>
+</ul>
+<h2 data-number="1.6" id="type-inference-and-checking-together" data-number="1.6"><span class="header-section-number">1.6</span> Type inference and checking together</h2>
+<p>Make the definitions of <code class="sourceCode ocaml">infer_type</code> and <code class="sourceCode ocaml">check_type</code> mutually recursive (<a href="0.ocaml.html">see there</a> for the syntax) and simplify your inference function by using checking in it.</p>
+<h2 data-number="1.7" id="other-connectives" data-number="1.7"><span class="header-section-number">1.7</span> Other connectives</h2>
+<p>Our aim is now to progressively add support for other logical connectives (this is the goal of the questions below). We recall that the full set of rules is</p>
+<figure>
+<img src="img/stl-full.svg" class="center" style="width:100.0%" alt="" /><figcaption>Typing rules</figcaption>
+</figure>
+<p>When adding constructors keep in mind that</p>
+<ul>
+<li><p>we need to be able to perform type inference: we might need to add some typing information to some type constructors,</p></li>
+<li><p>the less typing information we have to write, the better,</p></li>
+<li><p>it can be a good idea to slightly change the rules in order to use functions instead of having to recall free variables, for instance, the elimination rule for disjunction could be implemented as</p>
+<figure>
+<img src="img/coprod-fun.svg" class="center" height="50" alt="" /><figcaption>Typing rules</figcaption>
+</figure></li>
+</ul>
+<h2 data-number="1.8" id="conjunction" data-number="1.8"><span class="header-section-number">1.8</span> Conjunction</h2>
+<p>Add a constructor for conjunction of types and the corresponding constructors for terms (depending on your formalization some of the term constructor might need to take types as arguments, but please try to avoid that). In order to test it, write a term <code class="sourceCode ocaml">and_comm</code> witnessing the commutativity of conjunction:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="dt">print_endline</span> (string_of_ty (infer_type [] and_comm))</span></code></pre></div>
+<p>should print</p>
+<pre><code>((A /\ B) =&gt; (B /\ A))</code></pre>
+<h2 data-number="1.9" id="truth" data-number="1.9"><span class="header-section-number">1.9</span> Truth</h2>
+<p>A type and term constructors for truth and show <span class="math inline">\((\top\Rightarrow A)\Rightarrow A\)</span>.</p>
+<!--
+$$
+A\Rightarrow\top
+$$
+
+and
+
+$$
+(\top\Rightarrow A)\Rightarrow A
+$$
+-->
+<h2 data-number="1.10" id="disjunction" data-number="1.10"><span class="header-section-number">1.10</span> Disjunction</h2>
+<p>Add type and term constructors for disjunctions. Show that disjunction is commutative.</p>
+<h2 data-number="1.11" id="falsity" data-number="1.11"><span class="header-section-number">1.11</span> Falsity</h2>
+<p>Add type and term constructors for falsity. Show that</p>
+<p><span class="math display">\[
+(A\land(A\Rightarrow\bot))\Rightarrow B
+\]</span></p>
+<p>We do not explicitly add the negation in our language since it can be coded as <span class="math inline">\(\lnot A=A\Rightarrow\bot\)</span>.</p>
+<h2 data-number="1.12" id="parsing-strings" data-number="1.12"><span class="header-section-number">1.12</span> Parsing strings</h2>
+<p>Instead of writing terms in OCaml it can be useful to generate terms from strings. In <a href="doc/parser.ml">the file <code>parser.ml</code></a>, we provide you with functions, which you can copy in your code in order to do so (this is not <a href="https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html">the way</a> people would usually do parsing, but it has the advantage of not requiring external tools or files). The two functions of interest for you are <code class="sourceCode ocaml">ty_of_string</code> and <code class="sourceCode ocaml">tm_of_string</code>, of respective types <code class="sourceCode ocaml"><span class="dt">string</span> -&gt; ty</code> and <code class="sourceCode ocaml"><span class="dt">string</span> -&gt; tm</code>. Depending on the names you gave to the constructors you might have to adapt them a bit (feel free to <a href="mailto:samuel.mimram@lix.polytechnique.fr">ask for help</a>).</p>
+<p>The following code should be used in order to test the parsing of types</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>  <span class="kw">let</span> l = [</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>      <span class="st">&quot;A =&gt; B&quot;</span>;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a>      <span class="st">&quot;A /</span><span class="ch">\\</span><span class="st"> B&quot;</span>;</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a>      <span class="st">&quot;T&quot;</span>;</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>      <span class="st">&quot;A </span><span class="ch">\\</span><span class="st">/ B&quot;</span>;</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a>      <span class="st">&quot;_&quot;</span>;</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true"></a>      <span class="st">&quot;not A&quot;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true"></a>    ]</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true"></a>  <span class="kw">in</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true"></a>  <span class="dt">List</span>.iter (<span class="kw">fun</span> s -&gt; <span class="dt">Printf</span>.printf <span class="st">&quot;the parsing of %S is %s</span><span class="ch">\n</span><span class="st">%!&quot;</span> s (string_of_ty (ty_of_string s))) l</span></code></pre></div>
+<p>and of terms</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>  <span class="kw">let</span> l = [</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>      <span class="st">&quot;t u&quot;</span>;</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a>      <span class="st">&quot;fun (x : A) -&gt; t&quot;</span>;</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>      <span class="st">&quot;(t , u)&quot;</span>;</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>      <span class="st">&quot;fst(t)&quot;</span>;</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>      <span class="st">&quot;snd(t)&quot;</span>;</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a>      <span class="st">&quot;()&quot;</span>;</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>      <span class="st">&quot;case t of x -&gt; u | y -&gt; v&quot;</span>;</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a>      <span class="st">&quot;left(t,B)&quot;</span>;</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a>      <span class="st">&quot;right(A,t)&quot;</span>;</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a>      <span class="st">&quot;absurd(t,A)&quot;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a>    ]</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a>  <span class="kw">in</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true"></a>  <span class="dt">List</span>.iter (<span class="kw">fun</span> s -&gt; <span class="dt">Printf</span>.printf <span class="st">&quot;the parsing of %S is %s</span><span class="ch">\n</span><span class="st">%!&quot;</span> s (string_of_tm (tm_of_string s))) l</span></code></pre></div>
+<p>and should indicate you the syntax chosen here. It might be a good idea to adapt your functions <code>string_of_ty</code> and <code>string_of_tm</code> so that the two syntaxes match.</p>
+<h1 data-number="2" id="interactive-prover" data-number="2"><span class="header-section-number">2</span> Interactive prover</h1>
+<p>As you can imagine, directly writing a full λ-term in order to prove a formula is cumbersome and we now investigate a nice interface in order to incrementally elaborate proofs.</p>
+<h2 data-number="2.1" id="string-representation-of-contexts" data-number="2.1"><span class="header-section-number">2.1</span> String representation of contexts</h2>
+<p>Write a function <code class="sourceCode ocaml">string_of_ctx</code> of type <code class="sourceCode ocaml">context -&gt; <span class="dt">string</span></code> which gives the string representation of a context, such as</p>
+<pre><code>x : A =&gt; B , y : A /\ B , Z : T</code></pre>
+<p>The functions <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html#VALmap"><code class="sourceCode ocaml"><span class="dt">List</span>.map</code></a> and <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/String.html#VALconcat"><code class="sourceCode ocaml"><span class="dt">String</span>.concat</code></a> can be useful in order to do so.</p>
+<h2 data-number="2.2" id="sequents" data-number="2.2"><span class="header-section-number">2.2</span> Sequents</h2>
+<p>Define a type for sequents (here, of the form <span class="math inline">\(\Gamma\vdash A\)</span>):</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="kw">type</span> sequent = context * ty</span></code></pre></div>
+<p>Write a function <code class="sourceCode ocaml">string_of_seq</code> of type <code class="sourceCode ocaml">sequent -&gt; <span class="dt">string</span></code> which returns something like</p>
+<pre><code>x : A =&gt; B , y : A |- B</code></pre>
+<h2 data-number="2.3" id="an-interactive-prover" data-number="2.3"><span class="header-section-number">2.3</span> An interactive prover</h2>
+<p>Now, copy <a href="doc/proving.ml">the code provided in the file <code>proving.ml</code></a> at the end of your program. It defines a function <code class="sourceCode ocaml">prove</code> of type <code class="sourceCode ocaml">context -&gt; ty -&gt; tm</code> which, given a context <span class="math inline">\(\Gamma\)</span> and a type <span class="math inline">\(A\)</span> returns a term <span class="math inline">\(t\)</span> such that <span class="math inline">\(\Gamma\vdash t:A\)</span> is derivable. Of course, this function will not guess the proof by itself but will ask the user to enter some special commands, called <em>tactics</em>, in order to do so. This is for instance the way the <a href="https://coq.inria.fr/">Coq prover</a> works. The code below the function first asks the user for a formula to prove:</p>
+<pre><code>Please enter the formula to prove:</code></pre>
+<p>If you enter a formula such as</p>
+<pre><code>A =&gt; B =&gt; A</code></pre>
+<p>It then prints</p>
+<pre><code>Let&#39;s prove it.</code></pre>
+<p>to indicate that we have started the proof, then it shows the sequent we are currently proving, called the current <em>goal</em>:</p>
+<pre><code> |- (A =&gt; (B =&gt; A))</code></pre>
+<p>(we are proving the above formula in the empty context) and then it displays</p>
+<pre><code>? </code></pre>
+<p>to indicate that he is waiting for a tactic from the user. One of the two tactics currently implemented is <code>intro</code>. It takes an argument <span class="math inline">\(x\)</span>, which is a variable name and, when the goal is an implication, performs an introduction rule</p>
+<figure>
+<img src="img/arr-I.svg" class="center" width="200" alt="" /><figcaption>Introduction of arrows</figcaption>
+</figure>
+<p>using <span class="math inline">\(x\)</span> as the name of the new variable in the premise, and then it goes on proving the premise of the introduction rule. Our proof could thus start as follows:</p>
+<pre><code>Please enter the formula to prove:
+A =&gt; B =&gt; A
+Let&#39;s prove it.
+ |- (A =&gt; (B =&gt; A))
+? intro x
+x : A |- (B =&gt; A)
+? intro y
+x : A , y : B |- A
+? </code></pre>
+<p>Now, in order to finish our proof, we should use an axiom rule. This is implemented by the tactic <code>exact x</code> which indicate that the current goal is exactly the hypothesis <code>x</code> in the context:</p>
+<pre><code>x : A , y : B |- A
+? exact x
+done.</code></pre>
+<p>Finally, the program prints the corresponding proof term and ensures that its type is the formula we wanted to prove:</p>
+<pre><code>Proof term is
+(fun (x : A) -&gt; (fun (y : B) -&gt; x))
+Typechecking... ok.</code></pre>
+<p>This last step is important: our tactics can perform complicated tasks, and might thus be buggy, but this is not a problem since we trust our typechecker to detect this.</p>
+<h2 data-number="2.4" id="elimination-of-arrows" data-number="2.4"><span class="header-section-number">2.4</span> Elimination of arrows</h2>
+<p>We have tactics for the axiom rule (<code>exact</code>) and for the introduction rule for arrows (<code>intro</code>). In order, to be able to perform full proofs with arrows, we still need to implement the elimination rule for arrows:</p>
+<figure>
+<img src="img/arr-E.svg" class="center" width="300" alt="" /><figcaption>Arrow elimination</figcaption>
+</figure>
+<p>Implement a tactic <code>elim</code> taking as argument a variable <span class="math inline">\(x\)</span> whose type in the context is of the form <span class="math inline">\(A\to B\)</span> and implements the above rule with <span class="math inline">\(t=x\)</span>: the user will be left with proving the premise on the right (i.e. we have to prove <span class="math inline">\(A\)</span>). For instance,</p>
+<pre><code>f : (A =&gt; B) , x : A |- B
+? elim f
+f : (A =&gt; B) , x : A |- A</code></pre>
+<p>Prove the formula</p>
+<pre><code>(A =&gt; B) =&gt; A =&gt; B</code></pre>
+<h2 data-number="2.5" id="proofs-in-files" data-number="2.5"><span class="header-section-number">2.5</span> Proofs in files</h2>
+<p>In order not to have to type the proofs form the beginning each time, you can save your proofs in files which contain the list of commands you entered (including the initial formula). For instance, the proof of <code>A =&gt; B =&gt; A</code> is stored in <a href="doc/k.proof">this file k.proof</a>.</p>
+<p>In order to test a file, open a console and compile your program</p>
+<pre><code>ocamlopt prover.ml -o prover</code></pre>
+<p>and then feed it with the file:</p>
+<pre><code>cat k.proof | ./prover</code></pre>
+<p>This is the files you are asked to write when asked to prove formulas. We chose to give them the <code>.proof</code> extension. Write the proof files for the following formulas:</p>
+<!--
+- $(A\Rightarrow B)\Rightarrow A\Rightarrow B$.
+- $(A\Rightarrow B)\Rightarrow(B\Rightarrow C)\Rightarrow A\Rightarrow C$
+- $(A\Rightarrow B\Rightarrow C)\Rightarrow (A\Rightarrow B)\Rightarrow A\Rightarrow C$
+- $((A\Rightarrow A)\Rightarrow B)\Rightarrow B$
+-->
+<ul>
+<li><code>app.proof</code>: <code>(A =&gt; B) =&gt; A =&gt; B</code></li>
+<li><code>comp.proof</code>: <code>(A =&gt; B) =&gt; (B =&gt; C) =&gt; A =&gt; C</code></li>
+<li><code>appid.proof</code>: <code>((A =&gt; A) =&gt; B) =&gt; B</code></li>
+</ul>
+<p><em>Optional.</em> It might be a good idea to store all the commands you type in the interactive mode in a file (so that you do not have to copy them by hand after elaborating your proof). You can open a file with the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/Pervasives.html#VALopen_out"><code>open_out</code> function</a> of type <code class="sourceCode ocaml"><span class="dt">string</span> -&gt; <span class="dt">out_channel</span></code> (the argument is the file name) and write to it with the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/Pervasives.html#VALoutput_string"><code>output_string</code> function</a> of type <code>out_channel -&gt; string -&gt; unit</code>.</p>
+<!-- _Even more optional_. It might also be handy to add an undo command. -->
+<h2 data-number="2.6" id="full-arrow-elimination" data-number="2.6"><span class="header-section-number">2.6</span> Full arrow elimination</h2>
+<p>Try to prove</p>
+<pre><code>(A =&gt; B =&gt; C) =&gt; (A =&gt; B) =&gt; A =&gt; C</code></pre>
+<p>can you manage to do it? No. The reason is that we have restricted elimination rule of arrow</p>
+<figure>
+<img src="img/arr-E.svg" class="center" width="300" alt="" /><figcaption>Arrow elimination</figcaption>
+</figure>
+<p>to the case where <span class="math inline">\(t\)</span> is a variable. We now introduce another tactic <code>cut</code> which takes the formula <span class="math inline">\(A\)</span> as argument and implements the above rule: it will successively ask the user to prove both premises of the rule. For instance, we could start trying proving <code>A =&gt; A</code> by first proving a lemma <code>B</code>:</p>
+<pre><code> |- (A =&gt; A)
+? cut B
+ |- (B =&gt; (A =&gt; A))
+? intro y
+y : B |- (A =&gt; A)
+? intro x
+y : B , x : A |- A
+? exact x
+ |- B</code></pre>
+<p>Once this is implemented, prove (in <code>s.proof</code>)</p>
+<pre><code>(A =&gt; B =&gt; C) =&gt; (A =&gt; B) =&gt; A =&gt; C</code></pre>
+<h2 data-number="2.7" id="conjunctions" data-number="2.7"><span class="header-section-number">2.7</span> Conjunctions</h2>
+<p>Extend the <code>intro</code> tactic so that it implements the introduction rule for conjunctions when the goal is a conjunction:</p>
+<pre><code> |- (A /\ B)
+? intro 
+ |- A
+? ...
+ |- B
+? ...
+ </code></pre>
+<p>Prove</p>
+<ul>
+<li><code>diag.proof</code>: <code>A =&gt; A /\ A</code></li>
+<li><code>curry1.proof</code>: <code>(A /\ B =&gt; C) =&gt; A =&gt; B =&gt; C</code></li>
+</ul>
+<p>Add a <code>fst</code> and <code>snd</code> tactic, which take as argument a variable whose type is a conjunction, and use the left (resp. right) elimination rule on it in order to prove the current goal. For instance, a full proof of</p>
+<pre><code>A /\ B =&gt; A</code></pre>
+<p>is</p>
+<pre><code>Please enter the formula to prove:
+A /\ B =&gt; A
+Let&#39;s prove it.
+ |- ((A /\ B) =&gt; A)
+? intro x
+x : (A /\ B) |- A
+? fst x
+done.</code></pre>
+<p>Prove</p>
+<ul>
+<li><code>andcomm.proof</code>: <code>A /\ B =&gt; B /\ A</code></li>
+<li><code>curry2.proof</code>: <code>(A =&gt; B =&gt; C) =&gt; A /\ B =&gt; C</code></li>
+</ul>
+<h2 data-number="2.8" id="truth-1" data-number="2.8"><span class="header-section-number">2.8</span> Truth</h2>
+<p>Extend the <code>intro</code> tactic so that it implements the introduction rule for truth.</p>
+<p>Prove</p>
+<ul>
+<li><code>tintro.proof</code>: <code>A =&gt; T</code></li>
+<li><code>tstr.proof</code>: <code>(T =&gt; A) =&gt; A</code></li>
+</ul>
+<h2 data-number="2.9" id="disjunction-1" data-number="2.9"><span class="header-section-number">2.9</span> Disjunction</h2>
+<p>Add <code>left</code> and <code>right</code> tactics, which respectively perform the left and right introduction rules for disjunction. We should have</p>
+<pre><code> |- (A \/ B)
+? left
+ |- A
+? ...</code></pre>
+<p>and</p>
+<pre><code> |- (A \/ B)
+? right
+ |- B
+? ...</code></pre>
+<p>Prove</p>
+<ul>
+<li><code>injl.proof</code>: <code>A =&gt; A \/ B</code></li>
+<li><code>injr.proof</code>: <code>B =&gt; A \/ B</code></li>
+</ul>
+<p>Extend the <code>elim</code> tactic in order to implement the elimination rule for disjunction on a variable:</p>
+<pre><code>x : (A \/ B) |- C
+? elim x
+x : (A \/ B) , x : A |- C
+? ...
+x : (A \/ B) , x : B |- C
+? ...</code></pre>
+<p>Prove</p>
+<ul>
+<li><code>orcomm.proof</code>: <code>A \/ B =&gt; B \/ A</code></li>
+<li><code>orelim.proof</code>: <code>(A \/ B) =&gt; (A =&gt; C) =&gt; (B =&gt; C) =&gt; C</code></li>
+<li><code>dist.proof</code>: <code>(A /\ (B \/ C)) =&gt; (A /\ B) \/ (A /\ C)</code></li>
+</ul>
+<h2 data-number="2.10" id="falsity-1" data-number="2.10"><span class="header-section-number">2.10</span> Falsity</h2>
+<p>Extend the <code>elim</code> tactic so that it implement the elimination rule on a variable of type <span class="math inline">\(\bot\)</span> (which is noted <code>_</code> here):</p>
+<pre><code>x : _ |- A
+? elim x
+done.</code></pre>
+<p>We recall that <code>not A</code> is a shortcut for <code>A =&gt; _</code>. Prove</p>
+<ul>
+<li><code>felim.proof</code>: <code>_ =&gt; A</code></li>
+<li><code>ntf.proof</code>: <code>not T =&gt; _</code></li>
+<li><code>nni.proof</code>: <code>A =&gt; not (not A)</code></li>
+<li><code>contr.proof</code>: <code>(A =&gt; B) =&gt; (not B =&gt; not A)</code></li>
+<li><code>nnef.proof</code>: <code>not (not _) =&gt; _</code></li>
+<li><code>nnem.proof</code>: <code>not (not (A \/ not A))</code></li>
+<li><code>impdm.proof</code>: <code>((not A) \/ B) =&gt; A =&gt; B</code></li>
+<li><code>russel.proof</code>: <code>(A =&gt; not A) =&gt; (not A =&gt; A) =&gt; _</code></li>
+</ul>
+<h1 data-number="3" id="natural-numbers" data-number="3"><span class="header-section-number">3</span> Natural numbers</h1>
+<h2 data-number="3.1" id="a-type-for-natural-numbers" data-number="3.1"><span class="header-section-number">3.1</span> A type for natural numbers</h2>
+<p>Add a type <code>Nat</code> for (unary) natural numbers with three constructors (zero, the successor of a natural number, and the recursor). You can easily add the support for the type <code>Nat</code> int the parser by adding <code class="sourceCode ocaml"><span class="st">&quot;Nat&quot;</span></code> to the <code class="sourceCode ocaml">lexer</code> list (this declares it as a keyword) and adding a match case</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true"></a>    | <span class="dt">Genlex</span>.Kwd <span class="st">&quot;Nat&quot;</span> -&gt; Nat</span></code></pre></div>
+<p>to the <code class="sourceCode ocaml">base</code> function in <code class="sourceCode ocaml">ty_of_tk</code>.</p>
+<h2 data-number="3.2" id="introduction-rules" data-number="3.2"><span class="header-section-number">3.2</span> Introduction rules</h2>
+<p>Add two introduction rules corresponding to zero and successor.</p>
+<h2 data-number="3.3" id="elimination-rule" data-number="3.3"><span class="header-section-number">3.3</span> Elimination rule</h2>
+<p>Add an elimination rule which implements the recurrence principle on natural numbers (by extending the <code>elim</code> tactic).</p>
+<p>Define</p>
+<ul>
+<li><code>pred.proof</code>: the <em>predecessor</em> function (by convention the predecessor of zero is zero),</li>
+<li><code>add.proof</code>: the <em>addition</em> function.</li>
+</ul>
+<h1 data-number="4" id="optional-small-extensions" data-number="4"><span class="header-section-number">4</span> Optional: small extensions</h1>
+<p>If the above is done and working you can implement some of the extensions below. The reason why they are optional at this point is that you will anyway have to implement similar functions in next part for dependent types.</p>
+<h2 data-number="4.1" id="reduction" data-number="4.1"><span class="header-section-number">4.1</span> Reduction</h2>
+<p>Define a reduction procedure for the calculus and show the normal forms of proofs. Check that the addition of 6 and 5 gives 11.</p>
+<h2 data-number="4.2" id="declarations" data-number="4.2"><span class="header-section-number">4.2</span> Declarations</h2>
+<p>Add support for giving a name to a proof once it is over, and use those definitions in further proofs.</p>
+<p>For instance, declare that addition is called <code>add</code> and use it to define multiplication. Also define exponentiation.</p>
+<!--
+# Optional: support for (some) Curry style
+
+Explicitly having to state the type of each abstracted variable is cumbersome,
+especially since some might be a
+-->
+<h2 data-number="4.3" id="other-inductive-types" data-number="4.3"><span class="header-section-number">4.3</span> Other inductive types</h2>
+<p>Define other inductive types such as options, lists, etc. and prove interesting properties about those.</p>
+<p>Add support for general inductive types.</p>
+<h1 data-number="5" id="dependent-types" data-number="5"><span class="header-section-number">5</span> Dependent types</h1>
+<p>In this part, we are going to implement dependent types. While this is not considerably much harder than what we have done above, there are many subtle details, making it difficult to get the implementation right. This part can replace the article presentation. Since, in dependent types, the terms and types are both merged into <em>expressions</em>, it is better to start a new prover from scratch.</p>
+<h2 data-number="5.1" id="expressions" data-number="5.1"><span class="header-section-number">5.1</span> Expressions</h2>
+<p>Define a type for variables</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true"></a><span class="kw">type</span> var = <span class="dt">string</span></span></code></pre></div>
+<p>and a type for expressions</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true"></a><span class="kw">type</span> expr =</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true"></a>  | Type</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true"></a>  | Var <span class="kw">of</span> var</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true"></a>  | App <span class="kw">of</span> expr * expr</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true"></a>  | Abs <span class="kw">of</span> var * expr * expr</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true"></a>  | Pi <span class="kw">of</span> var * expr * expr</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true"></a>  <span class="co">(* forget about the constructors below at first *)</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true"></a>  | Nat</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true"></a>  | Z</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true"></a>  | S <span class="kw">of</span> expr</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true"></a>  | Ind <span class="kw">of</span> expr * expr * expr * expr </span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true"></a>  | Eq <span class="kw">of</span> expr * expr</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true"></a>  | Refl <span class="kw">of</span> expr</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true"></a>  | J <span class="kw">of</span> expr * expr * expr * expr * expr</span></code></pre></div>
+<p>where</p>
+<ul>
+<li><code>Type</code> is the type of all types (this is written <code>Set</code> in agda)</li>
+<li><code>Var</code> is a variable</li>
+<li><code>App</code> is an application</li>
+<li><code>Abs</code> is a λ-abstraction (the first expression is the type of the variable, and the second the body of the abstraction)</li>
+<li><code>Pi</code> is a dependent product (with the same conventions as for abstractions): <code>Pi(x, a, b)</code> is the type of functions which take an argument of type <code>a</code> and return a result of type <code>b</code> <em>where <code>b</code> might depend on <code>x</code></em> (i.e. have <code>x</code> as free variable).</li>
+</ul>
+<p>The other constructors below are for natural numbers and equality types, which will be implemented in a second time, and can be ignored for now (you can suppose that they will never occur).</p>
+<h2 data-number="5.2" id="string-representation-1" data-number="5.2"><span class="header-section-number">5.2</span> String representation</h2>
+<p>Define a function <code class="sourceCode ocaml">to_string</code> of type <code class="sourceCode ocaml">expr -&gt; <span class="dt">string</span></code> which provides the string representation of an expression. Again, you can simply return <code class="sourceCode ocaml"><span class="kw">assert</span> <span class="kw">false</span></code> for now for the last seven constructors.</p>
+<h2 data-number="5.3" id="fresh-variable-names" data-number="5.3"><span class="header-section-number">5.3</span> Fresh variable names</h2>
+<p>Define a function <code class="sourceCode ocaml">fresh_var</code> of type <code class="sourceCode ocaml"><span class="dt">unit</span> -&gt; var</code> which returns a fresh variable name at each call. For instance it might successively return <code>"x1"</code>, then <code>"x2"</code>, then <code>"x3"</code>, and so on.</p>
+<h2 data-number="5.4" id="substitution" data-number="5.4"><span class="header-section-number">5.4</span> Substitution</h2>
+<p>Define a function <code class="sourceCode ocaml">subst</code> of type <code class="sourceCode ocaml">var -&gt; expr -&gt; expr -&gt; expr</code> such that <code class="sourceCode ocaml">subst x t u</code> is the term obtained by replacing the variable <code>x</code> by <code>t</code> in <code>u</code>. This substitution should be <em>capture-avoiding</em>: an easy (but not particularly efficient) way to achieve this is to systematically replace the variables bound by an abstraction or a dependent product by a fresh variable name.</p>
+<h2 data-number="5.5" id="contexts" data-number="5.5"><span class="header-section-number">5.5</span> Contexts</h2>
+<p>Define the type of contexts:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true"></a><span class="kw">type</span> context = (var * (expr * expr <span class="dt">option</span>)) <span class="dt">list</span></span></code></pre></div>
+<p>A context associates, to each variable, a type (the first <code>expr</code>) and optionally a value: this value will be used when we make definitions, to store the value of variables.</p>
+<p>Define a function <code class="sourceCode ocaml">string_of_context</code> of type <code class="sourceCode ocaml">context -&gt; <span class="dt">string</span></code>. The result should consist in one line for each element of the context of the form</p>
+<pre><code>x : A</code></pre>
+<p>if the variable <code>x</code> has type <code>A</code> and no value or</p>
+<pre><code>x : A = t</code></pre>
+<p>if the variable <code>x</code> has type <code>A</code> and value <code>t</code>.</p>
+<h2 data-number="5.6" id="normalization" data-number="5.6"><span class="header-section-number">5.6</span> Normalization</h2>
+<p>Define a function <code class="sourceCode ocaml">normalize</code> of type <code class="sourceCode ocaml">context -&gt; expr -&gt; expr</code> which computes the normal form of an expression. Note that a variable which has a value in the environment should be replaced by (the normal form of) its value, which is why we need the context argument. Also note that the types are now dependent: this means that, in an abstraction or a dependent product, the type of the variable should also be normalized. You can assume that this function will only be called on expressions which are well-typed.</p>
+<h2 data-number="5.7" id="α-conversion" data-number="5.7"><span class="header-section-number">5.7</span> α-conversion</h2>
+<p>Define a function <code class="sourceCode ocaml">alpha</code> of type <code class="sourceCode ocaml">expr -&gt; expr -&gt; <span class="dt">bool</span></code> which tests whether two terms are α-convertible. Note that you can use substitution to change the name of a variable in the case of an abstraction or a dependent product.</p>
+<h2 data-number="5.8" id="conversion" data-number="5.8"><span class="header-section-number">5.8</span> Conversion</h2>
+<p>Using the two previous functions, define a function <code class="sourceCode ocaml">conv</code> of type <code class="sourceCode ocaml">context -&gt; expr -&gt; expr -&gt; <span class="dt">bool</span></code> which determines whether two terms are αβ-convertible.</p>
+<p>An important remark: <strong>this is the function you should always use in order to compare expressions</strong>. In particular, you should never compare two types using equality <code>=</code> or inequality <code>&lt;&gt;</code>, otherwise α-conversion and β-conversion will not be correctly handled.</p>
+<h2 data-number="5.9" id="type-inference-1" data-number="5.9"><span class="header-section-number">5.9</span> Type inference</h2>
+<p>First, define an exception</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true"></a><span class="kw">exception</span> Type_error</span></code></pre></div>
+<p>which will be raised when the type inference fails.</p>
+<p>Define a function <code class="sourceCode ocaml">infer</code> of type <code class="sourceCode ocaml">context -&gt; expr -&gt; expr</code> which infers the type of an expression in a given context (or raises <code>Type_error</code> if there is no such type). Note that the type of an abstraction (<code>Abs</code>) is a Π-type (<code>Pi</code>), whereas the type of a Π-type should be <code>Type</code>. You can assume that <code>Type</code> is of type <code>Type</code> itself.</p>
+<h2 data-number="5.10" id="type-checking-1" data-number="5.10"><span class="header-section-number">5.10</span> Type checking</h2>
+<p>Use it to define a function <code class="sourceCode ocaml">check</code> of type <code class="sourceCode ocaml">context -&gt; expr -&gt; expr -&gt; <span class="dt">unit</span></code> which raises <code class="sourceCode ocaml">Type_error</code> if, in a given context, a given term does not have a given type.</p>
+<h2 data-number="5.11" id="interaction-loop" data-number="5.11"><span class="header-section-number">5.11</span> Interaction loop</h2>
+<p>Copy all the <a href="doc/interaction.ml">code contained in this file</a> at the end of your file. It defines a function <code class="sourceCode ocaml">of_string</code> of type <code class="sourceCode ocaml"><span class="dt">string</span> -&gt; expr</code> which takes care of parsing an expression, and provides an <em>interaction loop</em>. The syntax for terms is illustrated below, we only mention that functions are of the form</p>
+<pre><code>fun (x : A) -&gt; t</code></pre>
+<p>and dependent products</p>
+<pre><code>Pi (x : A) -&gt; B</code></pre>
+<p>The notation <code>A =&gt; B</code> is the arrow type implemented as a dependent product as usual.</p>
+<p>The commands available are</p>
+<ul>
+<li><code>assume</code>: suppose given a variable of a given type,</li>
+<li><code>define</code>: define an expression,</li>
+<li><code>context</code>: print the current context,</li>
+<li><code>type</code>: print the type of an expression,</li>
+<li><code>check</code>: check that an expression has a given type,</li>
+<li><code>eval</code>: compute the normal form of an expression,</li>
+<li><code>exit</code>: quit the program.</li>
+</ul>
+<p>For your convenience, all the commands you type are stored in a file <code>interactive.proof</code>. An example session is</p>
+<pre><code>? assume Bool : Type
+Bool assumed of type Type
+? assume true : Bool
+true assumed of type Bool
+? assume false : Bool
+false assumed of type Bool
+? context
+Bool : Type
+true : Bool
+false : Bool
+? define idBool = fun (b : Bool) -&gt; b
+idBool defined to (fun (b : Bool) -&gt; b) of type ((b : Bool) -&gt; Bool)
+? type idBool true
+(idBool true) is of type Bool
+? check idBool false = Bool
+Ok.
+? eval idBool true
+true
+? define id = fun (A : Type) -&gt; fun (x : A) -&gt; x
+id defined to (fun (A : Type) -&gt; (fun (x : A) -&gt; x)) of type ((A : Type) -&gt; ((x : A) -&gt; A))
+? check id = Pi (A : Type) -&gt; Pi (x : A) -&gt; A
+Ok.
+? type id (Bool =&gt; Bool) (id Bool)
+((id ((_ : Bool) -&gt; Bool)) (id Bool)) is of type ((x4 : Bool) -&gt; Bool)
+? exit
+Bye.</code></pre>
+<p>The list of those commands can be found in the file <a href="doc/bool.proof"><code>bool.proof</code></a> and, as before is can be run with</p>
+<pre><code>cat bool.proof | ./prover</code></pre>
+<p>if you do not want to type all the commands each time.</p>
+<p>Run those commands and ensure that you have the same results as above.</p>
+<h2 data-number="5.12" id="natural-numbers-1" data-number="5.12"><span class="header-section-number">5.12</span> Natural numbers</h2>
+<p>Extend your functions in order to handle natural numbers:</p>
+<ul>
+<li><p><code>Nat</code> is the type of natural numbers,</p></li>
+<li><p><code>Z</code> is zero,</p></li>
+<li><p><code>S t</code> is the successor of <code>t</code>,</p></li>
+<li><p><code>Ind</code> is the <em>induction principle</em> which takes 4 arguments:</p>
+<ul>
+<li>a predicate <code>p</code> of type <code>Nat =&gt; Type</code>,</li>
+<li>a term <code>z</code> of type <code>p Z</code>, the base case,</li>
+<li>a term <code>s</code> of type <code>Pi (n : Nat) -&gt; p n =&gt; p (S n)</code>, the inductive case,</li>
+<li>a term <code>n</code> of type <code>Nat</code></li>
+</ul>
+<p>and returns a <code>p n</code>.</p></li>
+</ul>
+<p>We also recall the two reduction rules for <code>Ind</code>:</p>
+<ul>
+<li><code>Ind p z s Z</code> <span class="math inline">\(\rightsquigarrow\)</span> <code>z</code>,</li>
+<li><code>Ind p z s (S n)</code> <span class="math inline">\(\rightsquigarrow\)</span> <code>s n (Ind p z s n)</code>.</li>
+</ul>
+<p>Define the <em>predecessor</em> function <code>pred</code> and ensure that it works as expected (by convention the predecessor of zero is zero):</p>
+<pre><code>? eval pred Z
+Z
+? eval pred (S (S (S Z)))
+(S (S Z))</code></pre>
+<p>Define the <em>addition</em> function <code>add</code> and ensure that it works as expected:</p>
+<pre><code>? eval add (S (S (S Z))) (S (S Z))
+(S (S (S (S (S Z)))))</code></pre>
+<h2 data-number="5.13" id="equality" data-number="5.13"><span class="header-section-number">5.13</span> Equality</h2>
+<p>Extend your functions in order to handle equality:</p>
+<ul>
+<li><p><code>Eq t u</code> is the type of proofs of equality between <code>t</code> and <code>u</code> (both supposed to be of the same type),</p></li>
+<li><p><code>Refl t</code> is a proof that <code>t</code> is equal to itself,</p></li>
+<li><p><code>J</code> is the <em>eliminator</em> for equality which takes five arguments</p>
+<ul>
+<li>a predicate <code>p</code> of type <code>Pi (x : A) -&gt; Pi (y : A) -&gt; Eq x y =&gt; Type</code>,</li>
+<li>a proof <code>r</code> of <code>p</code> in the case of reflexivity, i.e. <code>r</code> is of type <code>Pi (x : A) -&gt; p x x (Refl x x)</code>,</li>
+<li>an element <code>x</code> of type <code>A</code>,</li>
+<li>an element <code>y</code> of type <code>A</code>,</li>
+<li>a proof <code>e</code> of equality between <code>x</code> and <code>y</code>, i.e. of type <code>Eq x y</code>,</li>
+</ul>
+<p>and returns a <code>p x y e</code>.</p></li>
+</ul>
+<p>The reduction rule for <code>J</code> is</p>
+<ul>
+<li><code>J p r x x (Refl x)</code> <span class="math inline">\(\rightsquigarrow\)</span> <code>r x</code></li>
+</ul>
+<h2 data-number="5.14" id="using-the-prover" data-number="5.14"><span class="header-section-number">5.14</span> Using the prover</h2>
+<ul>
+<li><p>Show that successor is compatible with equality, i.e., if two natural numbers <code>m</code> and <code>n</code> are equal then their successors are also equal: you should define a term <code>Seq</code> such that</p>
+<pre><code>? check Seq = Pi (x : Nat) -&gt; Pi (y : Nat) -&gt; Pi (e : Eq x y) -&gt; Eq (S x) (S y)
+Ok.</code></pre></li>
+<li><p>Show that zero is a neutral element for addition: you should define terms <code>zadd</code> and <code>addz</code> such that</p>
+<pre><code>? check zadd = Pi (n : Nat) -&gt; Eq (add Z n) n
+Ok.
+? check addz = Pi (n : Nat) -&gt; Eq (add n Z) n
+Ok.</code></pre>
+<p>(one should be much easier to define than the other).</p></li>
+<li><p>Show that addition is associative and commutative.</p></li>
+<li><p>Define multiplication and show similar properties.</p></li>
+</ul>
+<h2 data-number="5.15" id="optional-inductive-types" data-number="5.15"><span class="header-section-number">5.15</span> Optional: inductive types</h2>
+<p>Add support for</p>
+<ul>
+<li>falsity,</li>
+<li>truth,</li>
+<li>coproducts, and</li>
+<li>inductive types (using <a href="https://en.wikipedia.org/wiki/Inductive_type">W-types</a>, which subsume all the above cases).</li>
+</ul>
+<p>For each of those, prove a few properties (e.g. from <a href="5.propositional.html">TD5</a>) showing that your implementation works. For the last one, you can for instance define the type of binary trees, as well as the function which computes the height of a binary tree.</p>
+<h2 data-number="5.16" id="optional-interactive-prover" data-number="5.16"><span class="header-section-number">5.16</span> Optional: interactive prover</h2>
+<p>Implement an interactive prover with tactics (<code>intro</code>, <code>elim</code>, etc.) as you did in the first part.</p>
+<h2 data-number="5.17" id="optional-universes" data-number="5.17"><span class="header-section-number">5.17</span> Optional: universes</h2>
+<p>Prove that the system is inconsistent because we assumed <code>Type</code> to be of type <code>Type</code>.</p>
+<p>Correct this by adding a hierarchy of universes.</p>
+<h2 data-number="5.18" id="optional-better-handling-of-indices" data-number="5.18"><span class="header-section-number">5.18</span> Optional: better handling of indices</h2>
+<p>There are two standard ways of handling α-conversion, implement one of those, or both (make a backup of your current implementation first!):</p>
+<ul>
+<li>use <a href="https://en.wikipedia.org/wiki/De_Bruijn_index">de Bruijn indices</a> in order to represent variable names,</li>
+<li>use <a href="https://en.wikipedia.org/wiki/Normalisation_by_evaluation">normalization by evaluation</a> in order to reuse OCaml’s binders when normalizing terms.</li>
+</ul>
+</body>
+</html>

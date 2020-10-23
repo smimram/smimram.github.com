@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram" />
+  <title>Inductive types</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Inductive types</h1>
+<p class="author">Samuel Mimram</p>
+</header>
+<nav id="TOC">
+<ul>
+<li><a href="#booleans"><span class="toc-section-number">1</span> Booleans</a><ul>
+<li><a href="#the-type-of-booleans"><span class="toc-section-number">1.1</span> The type of booleans</a></li>
+<li><a href="#negation"><span class="toc-section-number">1.2</span> Negation</a></li>
+<li><a href="#conjunction"><span class="toc-section-number">1.3</span> Conjunction</a></li>
+<li><a href="#disjunction"><span class="toc-section-number">1.4</span> Disjunction</a></li>
+</ul></li>
+<li><a href="#equality"><span class="toc-section-number">2</span> Equality</a><ul>
+<li><a href="#negation-is-involutive"><span class="toc-section-number">2.1</span> Negation is involutive</a></li>
+<li><a href="#conjunction-and-negation"><span class="toc-section-number">2.2</span> Conjunction and negation</a></li>
+</ul></li>
+<li><a href="#natural-numbers"><span class="toc-section-number">3</span> Natural numbers</a><ul>
+<li><a href="#definition"><span class="toc-section-number">3.1</span> Definition</a></li>
+<li><a href="#addition"><span class="toc-section-number">3.2</span> Addition</a></li>
+<li><a href="#multiplication"><span class="toc-section-number">3.3</span> Multiplication</a></li>
+<li><a href="#equality-is-a-congruence-for-successor"><span class="toc-section-number">3.4</span> Equality is a congruence for successor</a></li>
+<li><a href="#some-properties"><span class="toc-section-number">3.5</span> Some properties</a></li>
+<li><a href="#the-recurrence-principle"><span class="toc-section-number">3.6</span> The recurrence principle</a></li>
+<li><a href="#more-equality"><span class="toc-section-number">3.7</span> More equality</a></li>
+<li><a href="#commutativity-of-addition"><span class="toc-section-number">3.8</span> Commutativity of addition</a></li>
+<li><a href="#injectivity-of-successor"><span class="toc-section-number">3.9</span> Injectivity of successor</a></li>
+<li><a href="#decidability-of-equality"><span class="toc-section-number">3.10</span> Decidability of equality</a></li>
+<li><a href="#recurrence-for-equality"><span class="toc-section-number">3.11</span> Recurrence for equality</a></li>
+<li><a href="#properties-of-multiplication"><span class="toc-section-number">3.12</span> Properties of multiplication</a></li>
+</ul></li>
+<li><a href="#lists"><span class="toc-section-number">4</span> Lists</a><ul>
+<li><a href="#length"><span class="toc-section-number">4.1</span> Length</a></li>
+<li><a href="#concatenation"><span class="toc-section-number">4.2</span> Concatenation</a></li>
+<li><a href="#list-reversal"><span class="toc-section-number">4.3</span> List reversal</a></li>
+<li><a href="#filtering"><span class="toc-section-number">4.4</span> Filtering</a></li>
+</ul></li>
+<li><a href="#division-by-2"><span class="toc-section-number">5</span> Division by 2</a><ul>
+<li><a href="#extrinsic-approach"><span class="toc-section-number">5.1</span> Extrinsic approach</a></li>
+<li><a href="#intrinsic-approach"><span class="toc-section-number">5.2</span> Intrinsic approach</a></li>
+</ul></li>
+<li><a href="#vectors"><span class="toc-section-number">6</span> Vectors</a><ul>
+<li><a href="#warmup"><span class="toc-section-number">6.1</span> Warmup</a></li>
+<li><a href="#definition-1"><span class="toc-section-number">6.2</span> Definition</a></li>
+<li><a href="#head-and-tail"><span class="toc-section-number">6.3</span> Head and tail</a></li>
+<li><a href="#concatenation-1"><span class="toc-section-number">6.4</span> Concatenation</a></li>
+<li><a href="#reversal"><span class="toc-section-number">6.5</span> Reversal</a></li>
+<li><a href="#accessing-an-element"><span class="toc-section-number">6.6</span> Accessing an element</a></li>
+<li><a href="#zipping"><span class="toc-section-number">6.7</span> Zipping</a></li>
+<li><a href="#optional-associativity-of-concatenation"><span class="toc-section-number">6.8</span> Optional: associativity of concatenation</a></li>
+</ul></li>
+<li><a href="#euclidean-division"><span class="toc-section-number">7</span> Euclidean division</a><ul>
+<li><a href="#optional-definition"><span class="toc-section-number">7.1</span> Optional: definition</a></li>
+<li><a href="#optional-correctness"><span class="toc-section-number">7.2</span> Optional: correctness</a></li>
+</ul></li>
+</ul>
+</nav>
+<p>This TD introduces inductive types in Agda. It is supposed to be done over two sessions.</p>
+<h1 id="booleans"><span class="header-section-number">1</span> Booleans</h1>
+<p>Start with a new file <code>Bool.agda</code>.</p>
+<h2 id="the-type-of-booleans"><span class="header-section-number">1.1</span> The type of booleans</h2>
+<p>Define the type <code>Bool</code> of <em>booleans</em> as an inductive type with two constructors:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">data</span> Bool <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb1-2" title="2">  true  <span class="ot">:</span> Bool</a>
+<a class="sourceLine" id="cb1-3" title="3">  false <span class="ot">:</span> Bool</a></code></pre></div>
+<!-- (they are defined in the `Data.Bool` module). -->
+<h2 id="negation"><span class="header-section-number">1.2</span> Negation</h2>
+<p>Define the negation <code>neg</code> as the function of type <code>Bool → Bool</code>. You can start with</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb2-1" title="1">not <span class="ot">:</span> Bool <span class="ot">→</span> Bool</a>
+<a class="sourceLine" id="cb2-2" title="2">not b <span class="ot">=</span> ?</a></code></pre></div>
+<h2 id="conjunction"><span class="header-section-number">1.3</span> Conjunction</h2>
+<p>Define the conjunction <code>_∧_</code> of type <code>Bool → Bool → Bool</code> (we recall that <code>∧</code> is typed on the keyboard as <code>\and</code>). The “underscore” notation means that this operation is infix. You can start with</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb3-1" title="1"><span class="ot">_</span>∧<span class="ot">_</span> <span class="ot">:</span> Bool <span class="ot">→</span> Bool <span class="ot">→</span> Bool</a>
+<a class="sourceLine" id="cb3-2" title="2">a ∧ b <span class="ot">=</span> ?</a></code></pre></div>
+<h2 id="disjunction"><span class="header-section-number">1.4</span> Disjunction</h2>
+<p>Define disjunction.</p>
+<h1 id="equality"><span class="header-section-number">2</span> Equality</h1>
+<p>Define equality by</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">data</span> <span class="ot">_</span>≡<span class="ot">_</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">:</span> <span class="ot">(</span>y <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb4-2" title="2">  refl <span class="ot">:</span> x ≡ x</a>
+<a class="sourceLine" id="cb4-3" title="3"></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="kw">infix</span> <span class="dv">4</span> <span class="ot">_</span>≡<span class="ot">_</span></a></code></pre></div>
+<p>Equality is an inductive type which depends on two terms <code>x</code> and <code>y</code>. It has only one constructor (named <code>refl</code>) which is of type <code>x ≡ x</code>, for any term <code>x</code>. You can forget about the “<code>infix</code>” line, which is only to indicate the priorities when parsing the symbol <code>≡</code>. By the way, the symbol <code>≡</code> is typed by <code>\equiv</code>.</p>
+<h2 id="negation-is-involutive"><span class="header-section-number">2.1</span> Negation is involutive</h2>
+<p>We want to show that applying twice the negation does not change anything. A first idea is thus the following proof:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb5-1" title="1">not-inv <span class="ot">:</span> <span class="ot">(</span>b <span class="ot">:</span> Bool<span class="ot">)</span> <span class="ot">→</span> not <span class="ot">(</span>not b<span class="ot">)</span> ≡ b</a>
+<a class="sourceLine" id="cb5-2" title="2">not-inv b <span class="ot">=</span> refl</a></code></pre></div>
+<p>Try it and read the error message: the problem here is that <code>not (not b)</code> and <code>b</code> are not the same, whereas the <code>refl</code> constructor has type <code>x ≡ x</code> for some <code>x</code>. This comes from the fact that <code>b</code> is a variable, which prevents <code>not (not b)</code> from reducing. How can we complete the proof?</p>
+<h2 id="conjunction-and-negation"><span class="header-section-number">2.2</span> Conjunction and negation</h2>
+<p>Construct a term of the following type:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb6-1" title="1"><span class="ot">(</span>b <span class="ot">:</span> Bool<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>not b<span class="ot">)</span> ∧ b ≡ false</a></code></pre></div>
+<h1 id="natural-numbers"><span class="header-section-number">3</span> Natural numbers</h1>
+<p>We are now going to define natural numbers and show some basic properties about those. Start a new file <code>Nat.agda</code>.</p>
+<h2 id="definition"><span class="header-section-number">3.1</span> Definition</h2>
+<p>Define the type <code>ℕ</code> of natural numbers, coded in unary, as an inductive type with two constructors <code>zero</code> and <code>suc</code>. The symbol <code>ℕ</code> is typed as <code>\bN</code>.</p>
+<h2 id="addition"><span class="header-section-number">3.2</span> Addition</h2>
+<p>Define addition as a term of type</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb7-1" title="1"><span class="ot">_</span>+<span class="ot">_</span> <span class="ot">:</span> ℕ <span class="ot">→</span> ℕ <span class="ot">→</span> ℕ</a></code></pre></div>
+<h2 id="multiplication"><span class="header-section-number">3.3</span> Multiplication</h2>
+<p>Define multiplication (noted <code>*</code>).</p>
+<h2 id="equality-is-a-congruence-for-successor"><span class="header-section-number">3.4</span> Equality is a congruence for successor</h2>
+<p>Copy again the definition of equality in this file</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">data</span> <span class="ot">_</span>≡<span class="ot">_</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">:</span> <span class="ot">(</span>y <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb8-2" title="2">  refl <span class="ot">:</span> x ≡ x</a>
+<a class="sourceLine" id="cb8-3" title="3"></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="kw">infix</span> <span class="dv">4</span> <span class="ot">_</span>≡<span class="ot">_</span></a></code></pre></div>
+<p>We want to show that equality is a congruence:</p>
+<p><span class="math display">\[
+\forall m\in\mathbb{N}. \forall n\in\mathbb{N}. m=n \Rightarrow (m+1)=(n+1)
+\]</span></p>
+<p>We thus begin defining a term with</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb9-1" title="1">suc-≡ <span class="ot">:</span> <span class="ot">{</span>m n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>m ≡ n<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>suc m ≡ suc n<span class="ot">)</span></a>
+<a class="sourceLine" id="cb9-2" title="2">suc-≡ e <span class="ot">=</span> ?</a></code></pre></div>
+<p>Note that we have declared the two arguments <code>m</code> and <code>n</code> as implicit since they can be inferred from the third argument (which is a proof of <code>m ≡ n</code>).</p>
+<p>Reason by case analysis on the argument <code>e</code>, observe what is happening and explain it. Finish the proof.</p>
+<h2 id="some-properties"><span class="header-section-number">3.5</span> Some properties</h2>
+<p>Show that the following properties are satisfied:</p>
+<ol type="1">
+<li><span class="math inline">\(\forall n\in\mathbb{N}. 0+n=n\)</span></li>
+<li><span class="math inline">\(\forall n\in\mathbb{N}. n+0=n\)</span></li>
+<li><span class="math inline">\(\forall m,n,p\in\mathbb{N}. (m+n)+p=m+(n+p)\)</span></li>
+<li><span class="math inline">\(\forall m,n\in\mathbb{N}. (m+n)+1=m+(n+1)\)</span></li>
+<li><span class="math inline">\(\forall n, 0\neq n+1\)</span></li>
+</ol>
+<p>Above, “<span class="math inline">\(n+1\)</span>” is always understood as the successor of <span class="math inline">\(n\)</span>.</p>
+<h2 id="the-recurrence-principle"><span class="header-section-number">3.6</span> The recurrence principle</h2>
+<p>In mathematics, the <em>recurrence principle</em> asserts that if <span class="math inline">\(P\)</span> is a proposition on natural numbers such that</p>
+<ul>
+<li><span class="math inline">\(P(0)\)</span> holds, and</li>
+<li>for every <span class="math inline">\(n\in\mathbb{N}\)</span>, <span class="math inline">\(P(n)\)</span> holds implies <span class="math inline">\(P(n+1)\)</span> holds,</li>
+</ul>
+<p>the <span class="math inline">\(P(n)\)</span> holds for every natural number <span class="math inline">\(n\)</span>. Prove the recurrence principle in Agda (a proposition can be formalized as a function <code class="sourceCode agda">ℕ <span class="ot">→</span> <span class="dt">Set</span></code>).</p>
+<!-- ```agda -->
+<!-- rec : (P : ℕ → Set) → P zero → ((n : ℕ) → P n → P (suc n)) → (n : ℕ) → P n -->
+<!-- ``` -->
+<p>Use this to prove <span class="math inline">\(\forall n\in\mathbb{N}. n+0=n\)</span> again.</p>
+<h2 id="more-equality"><span class="header-section-number">3.7</span> More equality</h2>
+<p>Show that equality is symmetric:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb10-1" title="1">sym <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>x y <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> x ≡ y <span class="ot">→</span> y ≡ x</a></code></pre></div>
+<p>transitive</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb11-1" title="1">trans <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>x y z <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> x ≡ y <span class="ot">→</span> y ≡ z <span class="ot">→</span> x ≡ z</a></code></pre></div>
+<p>and a congruence</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb12-1" title="1">cong <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">(</span>f <span class="ot">:</span> A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">{</span>x y <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> x ≡ y <span class="ot">→</span> f x ≡ f y</a></code></pre></div>
+<p>How can you prove <code>suc-≡</code> using <code>cong</code>?</p>
+<h2 id="commutativity-of-addition"><span class="header-section-number">3.8</span> Commutativity of addition</h2>
+<p>Show that addition is commutative:</p>
+<p><span class="math display">\[
+\forall m,n\in\mathbb{N}. m+n=n+m
+\]</span></p>
+<h2 id="injectivity-of-successor"><span class="header-section-number">3.9</span> Injectivity of successor</h2>
+<p>Show that <code class="sourceCode agda">suc</code> is injective.</p>
+<h2 id="decidability-of-equality"><span class="header-section-number">3.10</span> Decidability of equality</h2>
+<p>Show that equality is <em>decidable</em> on natural numbers. This means that we have an algorithm which, given two natural numbers says whether they are equal or not. In Agda, this can be formalized by constructing a term of the following type:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb13-1" title="1"><span class="ot">(</span>m n <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>m ≡ n<span class="ot">)</span> ∨ ¬ <span class="ot">(</span>m ≡ n<span class="ot">)</span></a></code></pre></div>
+<p>In order to have access to the negation (<code>¬</code>) and the disjunction (<code>∨</code>), you should first import the required modules:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Relation<span class="ot">.</span>Nullary</a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Sum <span class="kw">renaming</span> <span class="ot">(_</span>⊎<span class="ot">_</span> <span class="kw">to</span> <span class="ot">_</span>∨<span class="ot">_</span> <span class="ot">;</span> inj₁ <span class="kw">to</span> left <span class="ot">;</span> inj₂ <span class="kw">to</span> right<span class="ot">)</span></a></code></pre></div>
+<p>We recall that the syntax for defining a function <code>f n</code> by matching with another argument looks like</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb15-1" title="1">f n <span class="kw">with</span> bla</a>
+<a class="sourceLine" id="cb15-2" title="2"><span class="ot">...</span> <span class="ot">|</span> b <span class="ot">=</span> ?</a></code></pre></div>
+<h2 id="recurrence-for-equality"><span class="header-section-number">3.11</span> Recurrence for equality</h2>
+<p>We shown the recurrence principle for natural numbers. In fact, any inductive type has an associated recurrence principle. The one for equality is called “J”:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb16-1" title="1">J <span class="ot">:</span> <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>P <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>y <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>p <span class="ot">:</span> x ≡ y<span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>r <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> P x x refl<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>y <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>p <span class="ot">:</span> x ≡ y<span class="ot">)</span> <span class="ot">→</span> P x y p</a></code></pre></div>
+<p>Read it carefully: what does it mean? Then, prove it.</p>
+<h2 id="properties-of-multiplication"><span class="header-section-number">3.12</span> Properties of multiplication</h2>
+<p>We now turn to multiplication. You can skip this part at first and come back to it later if you have time.</p>
+<p>Show that multiplication is commutative</p>
+<p><span class="math display">\[
+\forall m,n\in\mathbb{N}. m\times n=n\times m
+\]</span></p>
+<p>You will certainly need to show preliminary lemmas.</p>
+<p>Also, show that multiplication is associative</p>
+<p><span class="math display">\[
+\forall m,n,p\in\mathbb{N}. (m\times n)\times p=m\times(n\times p)
+\]</span></p>
+<h1 id="lists"><span class="header-section-number">4</span> Lists</h1>
+<p>In a new file <code>List.agda</code>, define lists by</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">data</span> List <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb17-2" title="2">  []  <span class="ot">:</span> List A</a>
+<a class="sourceLine" id="cb17-3" title="3">  <span class="ot">_</span>∷<span class="ot">_</span> <span class="ot">:</span> A <span class="ot">→</span> List A <span class="ot">→</span> List A</a>
+<a class="sourceLine" id="cb17-4" title="4"></a>
+<a class="sourceLine" id="cb17-5" title="5"><span class="kw">infixr</span> <span class="dv">5</span> <span class="ot">_</span>∷<span class="ot">_</span></a></code></pre></div>
+<p>The symbol <code>∷</code> is <em>not</em> <code>::</code>, it is typed as <code>\::</code>.</p>
+<h2 id="length"><span class="header-section-number">4.1</span> Length</h2>
+<p>Import the library defining functions related to natural numbers and equality:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb18-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Nat</a>
+<a class="sourceLine" id="cb18-2" title="2"><span class="kw">open</span> <span class="kw">import</span> Relation<span class="ot">.</span>Binary<span class="ot">.</span>PropositionalEquality</a></code></pre></div>
+<p>Define the length function:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb19-1" title="1">length <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> List A <span class="ot">→</span> ℕ</a></code></pre></div>
+<p>Note that we have chosen to make the type parameter <code>A</code> is implicit since it can be inferred from the list (the second argument).</p>
+<h2 id="concatenation"><span class="header-section-number">4.2</span> Concatenation</h2>
+<p>Define a function <code>concat</code> which concatenates two lists (of arbitrary type).</p>
+<p>Show that the length of the concatenation of two lists is the sum of their lengths.</p>
+<p>Show that concatenation is associative.</p>
+<h2 id="list-reversal"><span class="header-section-number">4.3</span> List reversal</h2>
+<p>Our aim is now to define and study in Agda the function which reverses the order of elements of a list. For instance, in OCaml this function is called <code>List.rev</code>:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><a class="sourceLine" id="cb20-1" title="1"># <span class="dt">List</span>.rev [<span class="dv">1</span>;<span class="dv">4</span>;<span class="dv">5</span>;<span class="dv">7</span>];;</a>
+<a class="sourceLine" id="cb20-2" title="2">- : <span class="dt">int</span> <span class="dt">list</span> = [<span class="dv">7</span>; <span class="dv">5</span>; <span class="dv">4</span>; <span class="dv">1</span>]</a></code></pre></div>
+<ol type="1">
+<li>Define (in Agda) a function <code>snoc</code> which appends an element at the end of a list (the element becomes the last element).</li>
+<li>Define the function <code>rev</code> which reverses the order of the elements of a list.</li>
+<li>Show that the <code>rev</code> function preserves the length. In order to complete your proof you are likely to need to prove an auxiliary lemma first.</li>
+<li>More difficult, show that the <code>rev</code> function applied twice to a list does not change the list. Here also you are likely to need an appropriate lemma.</li>
+</ol>
+<h2 id="filtering"><span class="header-section-number">4.4</span> Filtering</h2>
+<p>In OCaml, there is a <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html#VALfilter"><code class="sourceCode ocaml"><span class="dt">List</span>.filter</code> function</a> whose type is</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><a class="sourceLine" id="cb21-1" title="1">(&#39;a -&gt; <span class="dt">bool</span>) -&gt; &#39;a <span class="dt">list</span> -&gt; &#39;a <span class="dt">list</span></a></code></pre></div>
+<p>such that <code class="sourceCode ocaml"><span class="dt">List</span>.filter p l</code> returns the list obtained from <code>l</code> by keeping only the elements <code>x</code> such that <code>p x</code> is <code class="sourceCode ocaml"><span class="kw">true</span></code>. For instance, we can compute the even elements of a list of integers:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><a class="sourceLine" id="cb22-1" title="1"># <span class="dt">List</span>.filter (<span class="kw">fun</span> n -&gt; n <span class="kw">mod</span> <span class="dv">2</span> = <span class="dv">0</span>) [<span class="dv">1</span>;<span class="dv">3</span>;<span class="dv">4</span>;<span class="dv">6</span>;<span class="dv">7</span>;<span class="dv">10</span>;<span class="dv">11</span>;<span class="dv">12</span>];; </a>
+<a class="sourceLine" id="cb22-2" title="2">- : <span class="dt">int</span> <span class="dt">list</span> = [<span class="dv">4</span>; <span class="dv">6</span>; <span class="dv">10</span>; <span class="dv">12</span>]</a></code></pre></div>
+<p>In Agda, import the library for booleans</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb23-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Bool</a></code></pre></div>
+<p>and define a similar function</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb24-1" title="1">filter <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>p <span class="ot">:</span> A <span class="ot">→</span> Bool<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>l <span class="ot">:</span> List A<span class="ot">)</span> <span class="ot">→</span> List A</a></code></pre></div>
+<!--
+in Agda, which requires a new construction, called `with`{.agda}, that we now
+explain. As usual, we begin with
+
+```agda
+filter : {A : Set} → (p : A → Bool) → (l : List A) → List A
+filter p l = ?
+```
+
+and perform a case analysis on `l` so that we obtain
+
+```agda
+filter : {A : Set} → (p : A → Bool) → (l : List A) → List A
+filter p [] = ?
+filter p (x ∷ l) = ?
+```
+
+The first case is easily handled, but for the second case we need to reason by
+case analysis on the value of `p x`. We thus replace, the second line as
+follows:
+
+```agda
+filter : {A : Set} → (p : A → Bool) → (l : List A) → List A
+filter p [] = ?
+filter p (x ∷ l) with p x
+... | b = ?
+```
+
+The `with p x`{.agda} indicates that we want to match on the result of `p x`. In
+the line after, the `...` are a shortcuts for the above line (i.e., `filter p (x
+∷ l)`{.agda}) and the variable `b` after the bar `|` is the result of `p x`: we
+can now reason by case analysis on `b` as usual.
+-->
+<ul>
+<li>Complete the definition of <code>filter</code>.</li>
+<li>Show that filtering a list by the constant function equal to <code>false</code> always gives the empty list.</li>
+<li>Show that filtering a list by the constant function equal to <code>true</code> always gives the original list.</li>
+</ul>
+<h1 id="division-by-2"><span class="header-section-number">5</span> Division by 2</h1>
+<p>In this section, we are going to prove the correctness of a first (very simple) algorithm: division by two. There are two approaches for that:</p>
+<ul>
+<li>in the <em>extrinsic</em> approach, we define the algorithm and after that show that it is correct,</li>
+<li>int the <em>intrinsic</em> approach, we directly give the algorithm a type which is rich enough to ensure that it is correct.</li>
+</ul>
+<p>We are going to try both ways. Start a new file <code>Div2.agda</code> and import the libraries you will need:</p>
+<ul>
+<li><p>equality:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb25-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Relation<span class="ot">.</span>Binary<span class="ot">.</span>PropositionalEquality</a></code></pre></div></li>
+<li><p>natural numbers:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb26-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Nat</a>
+<a class="sourceLine" id="cb26-2" title="2"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Nat<span class="ot">.</span>Properties <span class="kw">using</span> <span class="ot">(</span>+-suc<span class="ot">)</span></a></code></pre></div></li>
+<li><p>conjunction and disjunction:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb27-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Product <span class="kw">renaming</span> <span class="ot">(_</span>×<span class="ot">_</span> <span class="kw">to</span> <span class="ot">_</span>∧<span class="ot">_)</span></a>
+<a class="sourceLine" id="cb27-2" title="2"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Sum <span class="kw">renaming</span> <span class="ot">(_</span>⊎<span class="ot">_</span> <span class="kw">to</span> <span class="ot">_</span>∨<span class="ot">_</span> <span class="ot">;</span> inj₁ <span class="kw">to</span> left <span class="ot">;</span> inj₂ <span class="kw">to</span> right<span class="ot">)</span></a></code></pre></div></li>
+</ul>
+<p>In particular, you can use the <code>+-suc</code> lemma which is</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb28-1" title="1">+-suc <span class="ot">:</span> <span class="ot">∀</span> m n <span class="ot">→</span> m + suc n ≡ suc <span class="ot">(</span>m + n<span class="ot">)</span></a></code></pre></div>
+<h2 id="extrinsic-approach"><span class="header-section-number">5.1</span> Extrinsic approach</h2>
+<p>Define a function</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb29-1" title="1">div2 <span class="ot">:</span> ℕ <span class="ot">→</span> ℕ</a></code></pre></div>
+<p>which computes the quotient of the division by two of its argument. You can test your function by defining a value such as</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb30-1" title="1">test5 <span class="ot">:</span> ℕ</a>
+<a class="sourceLine" id="cb30-2" title="2">test5 <span class="ot">=</span> div2 <span class="ot">(</span>suc <span class="ot">(</span>suc <span class="ot">(</span>suc <span class="ot">(</span>suc <span class="ot">(</span>suc zero<span class="ot">)))))</span></a></code></pre></div>
+<p>which corresponds to <code>div2</code> applied to 5 and evaluate it by typing <code>C-c C-n</code>, which is the shortcut to normalize an expression, and asking to normalize <code>text5</code>: the answer should be 2 here, i.e., <code>suc (suc zero)</code>.</p>
+<p>The correctness of this function is given by the specification of division: we want to show that</p>
+<p><span class="math display">\[
+\forall n\in\mathbb{N}.\exists r\in\mathbb{N}. (0\leq r&lt;2) \land (n = 2 \times \mathrm{div2}(n) + r)
+\]</span></p>
+<p>where <span class="math inline">\(r\)</span> is the remainder of the division. Since the remainder can only be <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>, this is equivalent to</p>
+<p><span class="math display">\[
+\forall n\in\mathbb{N}.(n = 2 \times \mathrm{div2}(n))\lor(n = 2 \times \mathrm{div2}(n)+1)
+\]</span></p>
+<p>Import the module required for disjunction</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb31-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Sum <span class="kw">renaming</span> <span class="ot">(_</span>⊎<span class="ot">_</span> <span class="kw">to</span> <span class="ot">_</span>∨<span class="ot">_</span> <span class="ot">;</span> inj₁ <span class="kw">to</span> left <span class="ot">;</span> inj₂ <span class="kw">to</span> right<span class="ot">)</span></a></code></pre></div>
+<p>and show the Agda transcription of the above property:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb32-1" title="1">div2-correct <span class="ot">:</span> <span class="ot">(</span>n <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span><span class="dv">2</span> * div2 n ≡ n ∨ suc <span class="ot">(</span><span class="dv">2</span> * div2 n<span class="ot">)</span> ≡ n<span class="ot">)</span></a></code></pre></div>
+<h2 id="intrinsic-approach"><span class="header-section-number">5.2</span> Intrinsic approach</h2>
+<p>In the intrinsic approach, we want to directly define the function of division by 2 with a type which ensures that its result is correct. In order to do so, we must first import the functions related to <em>dependent sums</em> (also called <em>Σ-types</em>):</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb33-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Product</a></code></pre></div>
+<p>The allows the use of the Agda notation</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb34-1" title="1">Σ A P</a></code></pre></div>
+<p>which is the type of <em>dependent pairs</em> <code class="sourceCode agda"><span class="ot">(</span>a , b<span class="ot">)</span></code> whose first element <code>a</code> is of type <code>A</code> and second element <code>b</code> is of type <code>P a</code> (note that <code>P</code> is a predicate of type <code>A → Set</code>, and the type of the second element depends on the first element). From a logical point of view, it can be read as <em>“there exists an <code>a</code> in <code>A</code> such that <code>P a</code>”</em>.</p>
+<p>Now, construct a function of the following type:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb35-1" title="1">div2&#39; <span class="ot">:</span> <span class="ot">(</span>n <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> Σ ℕ <span class="ot">(λ</span> q <span class="ot">→</span> <span class="ot">(</span><span class="dv">2</span> * q ≡ n<span class="ot">)</span> ∨ <span class="ot">(</span>suc <span class="ot">(</span><span class="dv">2</span> * q<span class="ot">)</span> ≡ n<span class="ot">))</span></a></code></pre></div>
+<h1 id="vectors"><span class="header-section-number">6</span> Vectors</h1>
+<p>Start a new file <code>Vector.agda</code>.</p>
+<h2 id="warmup"><span class="header-section-number">6.1</span> Warmup</h2>
+<p>Import the library of lists</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb36-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>List</a></code></pre></div>
+<p>and try to define the <em>head</em> function</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb37-1" title="1">head <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> List A <span class="ot">→</span> A</a></code></pre></div>
+<p>which returns the first element of a list. What is the problem?</p>
+<h2 id="definition-1"><span class="header-section-number">6.2</span> Definition</h2>
+<p>Import the library of natural numbers as</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb38-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Nat</a></code></pre></div>
+<p>and define the type of <em>vectors</em> as</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb39-1" title="1"><span class="kw">data</span> Vec <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">:</span> ℕ <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb39-2" title="2">  []  <span class="ot">:</span> Vec A zero</a>
+<a class="sourceLine" id="cb39-3" title="3">  <span class="ot">_</span>∷<span class="ot">_</span> <span class="ot">:</span> <span class="ot">{</span>n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">→</span> A <span class="ot">→</span> Vec A n <span class="ot">→</span> Vec A <span class="ot">(</span>suc n<span class="ot">)</span></a></code></pre></div>
+<p>An term of type <code>Vec n</code> can be thought of as a list whose length is exactly <code>n</code>.</p>
+<h2 id="head-and-tail"><span class="header-section-number">6.3</span> Head and tail</h2>
+<p>Define functions to compute the <em>head</em> and <em>tail</em> of a vector. Be careful to correctly type those so that they are always defined.</p>
+<h2 id="concatenation-1"><span class="header-section-number">6.4</span> Concatenation</h2>
+<p>Define a <em>concatenation</em> function on vectors. Note that the type proves that it corresponds to sum on lengths.</p>
+<h2 id="reversal"><span class="header-section-number">6.5</span> Reversal</h2>
+<p>Define the <em>reversal</em> function on vectors.</p>
+<h2 id="accessing-an-element"><span class="header-section-number">6.6</span> Accessing an element</h2>
+<p>We define the type</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb40-1" title="1"><span class="kw">data</span> Fin <span class="ot">:</span> ℕ <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb40-2" title="2">  zero <span class="ot">:</span> <span class="ot">{</span>n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">→</span> Fin <span class="ot">(</span>suc n<span class="ot">)</span></a>
+<a class="sourceLine" id="cb40-3" title="3">  suc  <span class="ot">:</span> <span class="ot">{</span>n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">(</span>i <span class="ot">:</span> Fin n<span class="ot">)</span> <span class="ot">→</span> Fin <span class="ot">(</span>suc n<span class="ot">)</span></a></code></pre></div>
+<p>The elements of <code>Fin n</code> can be thought of as natural numbers <code>i</code> with 0 ≤ <code>i</code> &lt; <code>n</code>.</p>
+<p>Define the function which, given <span class="math inline">\(i\)</span> and a vector, computes the <span class="math inline">\(i\)</span>th element of the vector.</p>
+<h2 id="zipping"><span class="header-section-number">6.7</span> Zipping</h2>
+<p>Given two vectors <span class="math inline">\(x_1,\ldots,x_n\)</span> and <span class="math inline">\(y_1,\ldots,y_n\)</span>, define the <em>zip</em> function which returns the vector of pairs <span class="math inline">\((x_1,y_1),\ldots,(x_n,y_n)\)</span>. You should first do</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb41-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Product <span class="kw">hiding</span> <span class="ot">(</span>zip<span class="ot">)</span></a></code></pre></div>
+<p>in order to have access to products.</p>
+<h2 id="optional-associativity-of-concatenation"><span class="header-section-number">6.8</span> Optional: associativity of concatenation</h2>
+<p>Import the functions related to equality</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb42-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Relation<span class="ot">.</span>Binary<span class="ot">.</span>PropositionalEquality</a></code></pre></div>
+<p>Try to prove that concatenation is associative for vectors. What is the problem?</p>
+<p>Define the <em>coercion</em> function which expresses the fact that when two types are equal we can see an element of the first as an element of the second:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb43-1" title="1">coe <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> A ≡ B <span class="ot">→</span> A <span class="ot">→</span> B</a></code></pre></div>
+<p>Use it to correctly formulate the fact that concatenation of vectors is associative. It can be useful to import the proof of associativity of addition (<code>+-assoc</code>) by</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb44-1" title="1"><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Nat<span class="ot">.</span>Properties <span class="kw">using</span> <span class="ot">(</span>+-assoc<span class="ot">)</span></a></code></pre></div>
+<p>Show that concatenation of vectors is associative. You will certainly need first a lemma expressing the fact that if <code>l</code> is a vector of length <code>n</code> and <code>l'</code> is a vector of length <code>n'</code> such that <code>n</code> and <code>n'</code> are equal then <code>x ∷ l</code> and <code>x ∷ l'</code> are also equal, for any <code>x</code> of the expected type (you need to use the appropriate congruences and coercions in order to properly formulate that).</p>
+<p>As you can see this is fairly complicated… This can be simplified by using a variant of equality, called <em>heterogeneous equality</em>, which allows the comparison of two elements of distinct types. It is defined in the module</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb45-1" title="1"><span class="kw">import</span> Relation<span class="ot">.</span>Binary<span class="ot">.</span>HeterogeneousEquality</a></code></pre></div>
+<p>by</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb46-1" title="1"><span class="kw">data</span> <span class="ot">_</span>≅<span class="ot">_</span> <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">(</span>y <span class="ot">:</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb46-2" title="2">  refl <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>x <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> x ≅ x</a></code></pre></div>
+<p>Use it to simplify the above proof.</p>
+<h1 id="euclidean-division"><span class="header-section-number">7</span> Euclidean division</h1>
+<h2 id="optional-definition"><span class="header-section-number">7.1</span> Optional: definition</h2>
+<p>Define the quotient and remainder functions over natural numbers.</p>
+<h2 id="optional-correctness"><span class="header-section-number">7.2</span> Optional: correctness</h2>
+<p>Show that your definitions are correct according to the usual specification of division: for every natural numbers <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span>, with <span class="math inline">\(n\neq 0\)</span>, we have</p>
+<p><span class="math display">\[
+m = (m / n) * n + (m \operatorname{mod} n)
+\]</span></p>
+</body>
+</html>

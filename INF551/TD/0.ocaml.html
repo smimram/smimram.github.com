@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram" />
+  <title>Getting started with OCaml</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Getting started with OCaml</h1>
+<p class="author">Samuel Mimram</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#the-editor"><span class="toc-section-number">1</span> The editor</a></li>
+<li><a href="#functional-ocaml"><span class="toc-section-number">2</span> Functional OCaml</a>
+<ul>
+<li><a href="#values"><span class="toc-section-number">2.1</span> Values</a></li>
+<li><a href="#functions"><span class="toc-section-number">2.2</span> Functions</a></li>
+<li><a href="#control"><span class="toc-section-number">2.3</span> Control</a></li>
+<li><a href="#pairs"><span class="toc-section-number">2.4</span> Pairs</a></li>
+<li><a href="#lists"><span class="toc-section-number">2.5</span> Lists</a></li>
+<li><a href="#recursive-types"><span class="toc-section-number">2.6</span> Recursive types</a></li>
+</ul></li>
+<li><a href="#imperative-features"><span class="toc-section-number">3</span> Imperative features</a>
+<ul>
+<li><a href="#printing"><span class="toc-section-number">3.1</span> Printing</a></li>
+<li><a href="#references"><span class="toc-section-number">3.2</span> References</a></li>
+<li><a href="#exceptions"><span class="toc-section-number">3.3</span> Exceptions</a></li>
+</ul></li>
+<li><a href="#typing"><span class="toc-section-number">4</span> Typing</a></li>
+<li><a href="#compiling"><span class="toc-section-number">5</span> Compiling</a></li>
+</ul>
+</nav>
+<p>We recall here some basic constructions about OCaml. Some good and more detailed references are</p>
+<ul>
+<li>the <a href="http://www.enseignement.polytechnique.fr/profs/informatique/Jean-Christophe.Filliatre/INF549/">INF549 course notes and exercises</a>,</li>
+<li>the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/">OCaml user’s manual</a>,</li>
+<li>the <a href="http://dev.realworldocaml.org/index.html">real world OCaml book</a>,</li>
+<li>the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/">standard library’s documentation</a>.</li>
+</ul>
+<h1 data-number="1" id="the-editor" data-number="1"><span class="header-section-number">1</span> The editor</h1>
+<p>In order to edit OCaml files, you are strongly advised to use Emacs. There are better looking editors for OCaml, but you will have to use Emacs for Agda anyway, so that it is better to get used to it right now. Have a look at <a href="0.shortcuts.html">the shortcuts</a>.</p>
+<!--
+## Emacs
+
+You can start Emacs by typing `emacs&` in a console and then go to the
+menu "File" > "Visit New File" in order to open a new file. Some useful shortcurts
+are following. `C-x` means the "control" and the "x" key at the same time, and
+`M-x` means "alt" and "x". The standard shortcuts are
+
+Shortcut  Effect
+--------  ------
+`C-x C-f` open/create file
+`C-x C-s` save file
+`M-w`     copy
+`C-w`     cut
+`C-y`     paste
+`C-s`     find
+`tab`     indent
+
+and shortcuts specific to OCaml:
+
+Shortcut  Effect
+--------  ------
+`C-e`     evaluate current function
+`C-c C-b` evaluate the whole file
+`C-c C-t` give the type of the term under the cursor
+
+## Atom
+
+If you want a more modern-looking editor, with kind of standard shortcuts, you
+can use _Atom_. Apart from the standard shortcuts
+
+Shortcut  Effect
+--------  ------
+`C-s`     save file
+`C-c`     copy
+`C-x`     cut
+`C-v`     paste
+`C-f`     find
+
+the shortcuts specific to OCaml are
+
+Shortcut  Effect
+--------  ------
+`C-y C-o` launch and interactive session
+`C-y C-f` evaluate the whole file
+
+If you are working on your computer you should do the following to add support
+for OCaml (on TD rooms, this is taken care of for you). Go to the menu _Edit >
+Preferences > Install_, type "ocaml", and install
+
+- `language-ocaml`
+- `ocaml-merlin`
+- `ocaml-indent`
+- `ocaml-repl`
+-->
+<!--
+## Installing libraries
+
+*Skip this if you are working in the TD rooms.* In order to install OCaml
+libraries on your own computer you should use
+[opam](https://opam.ocaml.org/). You only have to do the following if you are
+working on your own computer. Initialize it by typing, in a console,
+
+```sh
+opam init -y
+```
+
+(this can take a few minutes, but has to be done only once). Then you are
+advised to install basic support for OCaml:
+
+```sh
+opam install -y tuareg merlin user-setup
+opam user-setup install
+```
+
+-->
+<h1 data-number="2" id="functional-ocaml" data-number="2"><span class="header-section-number">2</span> Functional OCaml</h1>
+<h2 data-number="2.1" id="values" data-number="2.1"><span class="header-section-number">2.1</span> Values</h2>
+<p>Declaring values:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">let</span> x = <span class="dv">2</span> * <span class="dv">3</span></span></code></pre></div>
+<p>Local declarations:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">let</span> x =</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>  <span class="kw">let</span> y = <span class="dv">2</span> + <span class="dv">2</span> <span class="kw">in</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a>  y * y</span></code></pre></div>
+<p>Commands:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>  <span class="dt">print_endline</span> <span class="st">&quot;Hello, world!&quot;</span>;</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  <span class="dt">print_endline</span> <span class="st">&quot;Bye.&quot;</span></span></code></pre></div>
+<h2 data-number="2.2" id="functions" data-number="2.2"><span class="header-section-number">2.2</span> Functions</h2>
+<p>Defining functions:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">let</span> f x = <span class="dv">2</span> * x</span></code></pre></div>
+<p>With multiple arguments:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="kw">let</span> f b x y =</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>  <span class="kw">if</span> b <span class="kw">then</span> x <span class="kw">else</span> y</span></code></pre></div>
+<p>With a unit argument:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">let</span> f () =</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>  <span class="dt">print_endline</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>    (<span class="st">&quot;Time since the beginning of execution: &quot;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a>     ^ <span class="dt">string_of_float</span> (<span class="dt">Sys</span>.time ()) ^ <span class="st">&quot; seconds&quot;</span>)</span></code></pre></div>
+<p>Recursive:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="kw">let</span> <span class="kw">rec</span> fact n =</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>  <span class="kw">if</span> n = <span class="dv">0</span> <span class="kw">then</span> <span class="dv">1</span> <span class="kw">else</span> n * (fact (n<span class="dv">-1</span>))</span></code></pre></div>
+<p>Mutually recursive:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="kw">let</span> <span class="kw">rec</span> even n =</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>  <span class="kw">if</span> n = <span class="dv">0</span> <span class="kw">then</span> <span class="kw">true</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>  <span class="kw">else</span> odd (n<span class="dv">-1</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a><span class="kw">and</span> odd n =</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>  <span class="kw">if</span> n = <span class="dv">0</span> <span class="kw">then</span> <span class="kw">false</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a>  <span class="kw">else</span> even (n<span class="dv">-1</span>)</span></code></pre></div>
+<p>Unnamed functions:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="kw">let</span> twice f =</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>  (<span class="kw">fun</span> f x -&gt; f (f x)) f</span></code></pre></div>
+<h2 data-number="2.3" id="control" data-number="2.3"><span class="header-section-number">2.3</span> Control</h2>
+<p>Conditional branching:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true"></a>  <span class="dt">print_endline</span> (<span class="kw">if</span> <span class="dt">Random</span>.<span class="dt">bool</span> () <span class="kw">then</span> <span class="st">&quot;true&quot;</span> <span class="kw">else</span> <span class="st">&quot;false&quot;</span>)</span></code></pre></div>
+<p>While loops:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="kw">let</span> syracuse n =</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>  <span class="kw">let</span> r = <span class="dt">ref</span> n <span class="kw">in</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a>  <span class="kw">while</span> !r &lt;&gt; <span class="dv">1</span> <span class="kw">do</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true"></a>    <span class="kw">if</span> !r <span class="kw">mod</span> <span class="dv">2</span> = <span class="dv">0</span> <span class="kw">then</span> r := !r / <span class="dv">2</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true"></a>    <span class="kw">else</span> r := <span class="dv">3</span> * !r + <span class="dv">1</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true"></a>  <span class="kw">done</span></span></code></pre></div>
+<p>The usual boolean operations are</p>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Equality</td>
+<td><code class="sourceCode ocaml">=</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Inequality</td>
+<td><code class="sourceCode ocaml">&lt;&gt;</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Conjunction</td>
+<td><code class="sourceCode ocaml">&amp;&amp;</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Disjunction</td>
+<td><code class="sourceCode ocaml">||</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Negation</td>
+<td><code class="sourceCode ocaml"><span class="dt">not</span></code></td>
+</tr>
+</tbody>
+</table>
+<p>You should <em>never</em> use <code>==</code> or <code>!=</code> to compare things.</p>
+<h2 data-number="2.4" id="pairs" data-number="2.4"><span class="header-section-number">2.4</span> Pairs</h2>
+<p>A pair can be created with</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a>(<span class="dv">3</span>, <span class="st">&quot;hello&quot;</span>)</span></code></pre></div>
+<p>A function taking a pair as argument</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="kw">let</span> <span class="dt">fst</span> (x, y) = x</span></code></pre></div>
+<h2 data-number="2.5" id="lists" data-number="2.5"><span class="header-section-number">2.5</span> Lists</h2>
+<p>The empty list</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a>[]</span></code></pre></div>
+<p>A non-empty list</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a>[<span class="dv">1</span>; <span class="dv">2</span>; <span class="dv">3</span>]</span></code></pre></div>
+<p>Appending an element:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="kw">let</span> one_more l = <span class="dv">1</span>::l</span></code></pre></div>
+<p>Length of a list:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="kw">let</span> <span class="kw">rec</span> length =</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>  <span class="kw">match</span> l <span class="kw">with</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true"></a>  | [] -&gt; <span class="dv">0</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true"></a>  | x::l -&gt; <span class="dv">1</span> + (length l)</span></code></pre></div>
+<p>See the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html">documentation of the List module</a> for (much) more.</p>
+<h2 data-number="2.6" id="recursive-types" data-number="2.6"><span class="header-section-number">2.6</span> Recursive types</h2>
+<p>Binary trees can be defined by</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true"></a><span class="kw">type</span> &#39;a tree =</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true"></a>  | Node <span class="kw">of</span> &#39;a tree * &#39;a tree</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true"></a>  | Leaf <span class="kw">of</span> &#39;a</span></code></pre></div>
+<p>The maximal depth of a leaf is</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a><span class="kw">let</span> <span class="kw">rec</span> depth t =</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true"></a>  <span class="kw">match</span> t <span class="kw">with</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true"></a>  | Node (t, u) -&gt; <span class="dt">max</span> (depth t) (depth u)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true"></a>  | Leaf _ -&gt; <span class="dv">0</span></span></code></pre></div>
+<h1 data-number="3" id="imperative-features" data-number="3"><span class="header-section-number">3</span> Imperative features</h1>
+<h2 data-number="3.1" id="printing" data-number="3.1"><span class="header-section-number">3.1</span> Printing</h2>
+<div class="sourceCode" id="cb20"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true"></a>  <span class="dt">print_endline</span> <span class="st">&quot;hello!&quot;</span></span></code></pre></div>
+<h2 data-number="3.2" id="references" data-number="3.2"><span class="header-section-number">3.2</span> References</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true"></a>  <span class="kw">let</span> r = <span class="dt">ref</span> <span class="dv">0</span> <span class="kw">in</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true"></a>  <span class="kw">while</span> !r &lt; <span class="dv">10</span> <span class="kw">do</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true"></a>    <span class="dt">print_int</span> !r;</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true"></a>    r := !r + <span class="dv">1</span>;</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true"></a>    <span class="dt">print_endline</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true"></a>  <span class="kw">done</span></span></code></pre></div>
+<p>The counter:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="kw">let</span> count =</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true"></a>  <span class="kw">let</span> r = <span class="dt">ref</span> <span class="dv">0</span> <span class="kw">in</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true"></a>  <span class="kw">fun</span> () -&gt;</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true"></a>    r := !r + <span class="dv">1</span>;</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true"></a>    !r</span></code></pre></div>
+<h2 data-number="3.3" id="exceptions" data-number="3.3"><span class="header-section-number">3.3</span> Exceptions</h2>
+<p>An exception can be defined with:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true"></a><span class="kw">exception</span> My_exception</span></code></pre></div>
+<p>It can be raised by</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true"></a><span class="kw">let</span> f () =</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true"></a>  <span class="dt">raise</span> My_exception</span></code></pre></div>
+<p>It can be catched with</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true"></a><span class="kw">let</span> test () =</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true"></a>  <span class="kw">try</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true"></a>    f ();</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true"></a>    <span class="dt">print_endline</span> <span class="st">&quot;not raised&quot;</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true"></a>  <span class="kw">with</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true"></a>  | My_exception -&gt; <span class="st">&quot;raised&quot;</span></span></code></pre></div>
+<p>You can add tests in your code with</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true"></a>  <span class="kw">assert</span> (fact <span class="dv">5</span> = <span class="dv">120</span>)</span></code></pre></div>
+<p>A failed test will raise</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true"></a><span class="dt">Assert_failure</span> (...)</span></code></pre></div>
+<h1 data-number="4" id="typing" data-number="4"><span class="header-section-number">4</span> Typing</h1>
+<p>Some types:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true"></a># <span class="kw">let</span> x = <span class="dv">5</span>;;</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true"></a><span class="kw">val</span> x : <span class="dt">int</span> = <span class="dv">5</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true"></a># <span class="kw">let</span> s = <span class="st">&quot;hello&quot;</span>;;</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true"></a><span class="kw">val</span> s : <span class="dt">string</span> = <span class="st">&quot;hello&quot;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true"></a># <span class="kw">let</span> double x = <span class="dv">2</span> * x;;</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true"></a><span class="kw">val</span> double : <span class="dt">int</span> -&gt; <span class="dt">int</span> = &lt;<span class="kw">fun</span>&gt;</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true"></a># <span class="kw">let</span> f () =</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true"></a>  <span class="dt">print_endline</span> <span class="st">&quot;hello&quot;</span>;;</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true"></a><span class="kw">val</span> f : <span class="dt">unit</span> -&gt; <span class="dt">unit</span> = &lt;<span class="kw">fun</span>&gt;</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true"></a># <span class="kw">let</span> f x =</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true"></a>  <span class="dt">print_endline</span> (<span class="st">&quot;The argument is &quot;</span> ^ <span class="dt">string_of_int</span> x);;</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true"></a><span class="kw">val</span> f : <span class="dt">int</span> -&gt; <span class="dt">unit</span> = &lt;<span class="kw">fun</span>&gt;</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true"></a># <span class="kw">let</span> app f x = f x;;</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true"></a><span class="kw">val</span> app : (&#39;a -&gt; &#39;b) -&gt; &#39;a -&gt; &#39;b = &lt;<span class="kw">fun</span>&gt;</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true"></a># <span class="kw">let</span> <span class="dt">fst</span> (x, y) = x;;</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true"></a><span class="kw">val</span> <span class="dt">fst</span> : &#39;a * &#39;b -&gt; &#39;a = &lt;<span class="kw">fun</span>&gt;</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true"></a># <span class="kw">let</span> <span class="kw">rec</span> map f l =</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true"></a>  <span class="kw">match</span> l <span class="kw">with</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true"></a>  | [] -&gt; []</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true"></a>  | x::l -&gt; (f x)::(map f l);;</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true"></a><span class="kw">val</span> map : (&#39;a -&gt; &#39;b) -&gt; &#39;a <span class="dt">list</span> -&gt; &#39;b <span class="dt">list</span> = &lt;<span class="kw">fun</span>&gt;</span></code></pre></div>
+<h1 data-number="5" id="compiling" data-number="5"><span class="header-section-number">5</span> Compiling</h1>
+<p>An OCaml file <code>prog.ml</code> can be compiled with</p>
+<pre><code>ocamlopt prog.ml -o prog</code></pre>
+<p>and the resulting program can be executed with</p>
+<pre><code>./prog</code></pre>
+</body>
+</html>

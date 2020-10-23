@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram" />
+  <title>Propositional logic in Agda</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Propositional logic in Agda</h1>
+<p class="author">Samuel Mimram</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#getting-started"><span class="toc-section-number">1</span> Getting started</a>
+<ul>
+<li><a href="#installing-agda-on-your-own-computer"><span class="toc-section-number">1.1</span> Installing Agda on your own computer</a>
+<ul>
+<li><a href="#linux"><span class="toc-section-number">1.1.1</span> Linux</a></li>
+<li><a href="#macos"><span class="toc-section-number">1.1.2</span> MacOS</a></li>
+<li><a href="#windows"><span class="toc-section-number">1.1.3</span> Windows</a></li>
+</ul></li>
+<li><a href="#shortcuts"><span class="toc-section-number">1.2</span> Shortcuts</a></li>
+<li><a href="#symbols"><span class="toc-section-number">1.3</span> Symbols</a></li>
+</ul></li>
+<li><a href="#our-first-proof"><span class="toc-section-number">2</span> Our first proof</a></li>
+<li><a href="#implication"><span class="toc-section-number">3</span> Implication</a>
+<ul>
+<li><a href="#first-projection"><span class="toc-section-number">3.1</span> First projection</a></li>
+<li><a href="#application"><span class="toc-section-number">3.2</span> Application</a></li>
+<li><a href="#flip"><span class="toc-section-number">3.3</span> Flip</a></li>
+<li><a href="#transitivity-composition"><span class="toc-section-number">3.4</span> Transitivity / composition</a></li>
+<li><a href="#s"><span class="toc-section-number">3.5</span> S</a></li>
+</ul></li>
+<li><a href="#conjunction"><span class="toc-section-number">4</span> Conjunction</a>
+<ul>
+<li><a href="#projections"><span class="toc-section-number">4.1</span> Projections</a></li>
+<li><a href="#diagonal"><span class="toc-section-number">4.2</span> Diagonal</a></li>
+<li><a href="#commutativity"><span class="toc-section-number">4.3</span> Commutativity</a></li>
+<li><a href="#currying"><span class="toc-section-number">4.4</span> Currying</a></li>
+<li><a href="#optional-distributivity"><span class="toc-section-number">4.5</span> Optional: distributivity</a></li>
+</ul></li>
+<li><a href="#disjunction"><span class="toc-section-number">5</span> Disjunction</a>
+<ul>
+<li><a href="#elimination-rule"><span class="toc-section-number">5.1</span> Elimination rule</a></li>
+<li><a href="#commutativity-1"><span class="toc-section-number">5.2</span> Commutativity</a></li>
+<li><a href="#distributivity"><span class="toc-section-number">5.3</span> Distributivity</a></li>
+</ul></li>
+<li><a href="#negation"><span class="toc-section-number">6</span> Negation</a>
+<ul>
+<li><a href="#falsity"><span class="toc-section-number">6.1</span> Falsity</a></li>
+<li><a href="#negation-1"><span class="toc-section-number">6.2</span> Negation</a></li>
+<li><a href="#contradiction"><span class="toc-section-number">6.3</span> Contradiction</a></li>
+<li><a href="#non-contradiction"><span class="toc-section-number">6.4</span> Non-contradiction</a></li>
+<li><a href="#double-negation-introduction"><span class="toc-section-number">6.5</span> Double negation introduction</a></li>
+<li><a href="#double-negation-elimination-on-bot"><span class="toc-section-number">6.6</span> Double negation elimination on <span class="math inline">\(\bot\)</span></a></li>
+<li><a href="#elimination-of-negation"><span class="toc-section-number">6.7</span> Elimination of negation</a></li>
+<li><a href="#non-falsifiability-of-the-law-of-excluded-middle"><span class="toc-section-number">6.8</span> Non-falsifiability of the law of excluded middle</a></li>
+<li><a href="#russells-paradox"><span class="toc-section-number">6.9</span> Russell’s paradox</a></li>
+</ul></li>
+<li><a href="#truth"><span class="toc-section-number">7</span> Truth</a>
+<ul>
+<li><a href="#definition"><span class="toc-section-number">7.1</span> Definition</a></li>
+<li><a href="#strengthening"><span class="toc-section-number">7.2</span> ⊤-strengthening</a></li>
+<li><a href="#de-morgan"><span class="toc-section-number">7.3</span> De Morgan</a></li>
+</ul></li>
+<li><a href="#classical-logic"><span class="toc-section-number">8</span> Classical logic</a>
+<ul>
+<li><a href="#equivalence-between-excluded-middle-and-double-negation-elimination"><span class="toc-section-number">8.1</span> Equivalence between excluded middle and double negation elimination</a></li>
+<li><a href="#pierce-law"><span class="toc-section-number">8.2</span> Pierce law</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 data-number="1" id="getting-started"><span class="header-section-number">1</span> Getting started</h1>
+<p>Starting from today we are going to use <a href="https://wiki.portal.chalmers.se/agda/pmwiki.php">Agda</a>. In case you have a problem, you are encouraged to read <a href="https://agda.readthedocs.io/en/latest/">the official documentation</a>.</p>
+<h2 data-number="1.1" id="installing-agda-on-your-own-computer"><span class="header-section-number">1.1</span> Installing Agda on your own computer</h2>
+<p>This section is useful in order to install Agda on your personal computer, skip it if you are using the <a href="http://emacs.mimram.fr">online editor</a>.</p>
+<h3 data-number="1.1.1" id="linux"><span class="header-section-number">1.1.1</span> Linux</h3>
+<p>If you have a Linux distribution such as Ubuntu or Debian simply type</p>
+<pre><code>sudo apt-get install agda emacs agda-mode</code></pre>
+<p>in order to install Agda and Emacs.</p>
+<h3 data-number="1.1.2" id="macos"><span class="header-section-number">1.1.2</span> MacOS</h3>
+<p>Install brew by following <a href="https://brew.sh/">these instructions</a> (brew is a package manager for MacOS) and type</p>
+<pre><code>brew install agda emacs
+agda-mode setup</code></pre>
+<h3 data-number="1.1.3" id="windows"><span class="header-section-number">1.1.3</span> Windows</h3>
+<p>Install the <a href="http://homepage.divms.uiowa.edu/~astump/agda/">latest version found here</a> (this is <code>Agda2.6.0.1.v1.msi</code> at the time of this writing). After that, you still need to install the standard library by hand: it can be <a href="https://wiki.portal.chalmers.se/agda/pmwiki.php/Libraries/StandardLibrary">downloaded from here</a>, and you should copy the contents of the <code>src</code> directory of the archive to the <code>library</code> directory of the Agda installed by the previous installer.</p>
+<h2 data-number="1.2" id="shortcuts"><span class="header-section-number">1.2</span> Shortcuts</h2>
+<p>We recall that the most useful shortcuts are</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Shortcut</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>C-c C-l</code></td>
+<td>typecheck and highlight the current file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>C-c C-,</code></td>
+<td>get information about the hole under the cursor</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>C-c C-.</code></td>
+<td>show both the type of the current hole and of the proposed filling</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>C-c C-space</code></td>
+<td>give a solution</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>C-c C-c</code></td>
+<td>case analysis on a variable (≈ an elimination rule)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>C-c C-r</code></td>
+<td>refine the hole (≈ an introduction rule)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>C-c C-a</code></td>
+<td>automatic fill</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">middle click</td>
+<td>definition of the term</td>
+</tr>
+</tbody>
+</table>
+<h2 data-number="1.3" id="symbols"><span class="header-section-number">1.3</span> Symbols</h2>
+<p>Agda heavily resorts to UTF-8 notations. The Emacs mode has some great support for it, allowing to enter symbols generally as you would do in LaTeX. Some useful ones are</p>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">∧</td>
+<td><code>\and</code></td>
+<td style="text-align: left;">⊤</td>
+<td style="text-align: left;"><code>\top</code></td>
+<td style="text-align: left;">→</td>
+<td style="text-align: left;"><code>\to</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">∨</td>
+<td><code>\or</code></td>
+<td style="text-align: left;">⊥</td>
+<td style="text-align: left;"><code>\bot</code></td>
+<td style="text-align: left;">¬</td>
+<td style="text-align: left;"><code>\neg</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">∀</td>
+<td><code>\all</code></td>
+<td style="text-align: left;">Π</td>
+<td style="text-align: left;"><code>\Pi</code></td>
+<td style="text-align: left;">λ</td>
+<td style="text-align: left;"><code>\Gl</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">∃</td>
+<td><code>\ex</code></td>
+<td style="text-align: left;">Σ</td>
+<td style="text-align: left;"><code>\Sigma</code></td>
+<td style="text-align: left;">≡</td>
+<td style="text-align: left;"><code>\Equiv</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ℕ</td>
+<td><code>\bN</code></td>
+<td style="text-align: left;">×</td>
+<td style="text-align: left;"><code>\times</code></td>
+<td style="text-align: left;">≤</td>
+<td style="text-align: left;"><code>\le</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">∈</td>
+<td><code>\in</code></td>
+<td style="text-align: left;">⊎</td>
+<td style="text-align: left;"><code>\uplus</code></td>
+<td style="text-align: left;">∷</td>
+<td style="text-align: left;"><code>\::</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">∎</td>
+<td><code>\qed</code></td>
+<td style="text-align: left;">₁</td>
+<td style="text-align: left;"><code>\_1</code></td>
+<td style="text-align: left;">⇒</td>
+<td style="text-align: left;"><code>\=&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Many other symbols <a href="https://people.inf.elte.hu/divip/AgdaTutorial/Symbols.html">can be found here</a>.</p>
+<h1 data-number="2" id="our-first-proof"><span class="header-section-number">2</span> Our first proof</h1>
+<p>Try to do by yourself the first proof of the course. Begin by typing (or copying) the following (recall that “×” is entered with <code>\times</code> and “→” with <code>\to</code>):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Product</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>×-comm <span class="ot">:</span> <span class="ot">(</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>A × B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>B × A<span class="ot">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>×-comm A B p <span class="ot">=</span> ?</span></code></pre></div>
+<p>Then</p>
+<ol type="1">
+<li>Use <code>C-c C-l</code> to load the file.</li>
+<li>Use <code>C-c C-,</code> to obtain the type of the hole.</li>
+<li>Use <code>C-c C-c</code> then <code>p</code> to observe the argument.</li>
+<li>Use <code>C-c C-r</code> to refine the hole.</li>
+<li>Enter the answers in the two holes and use <code>C-c C-space</code>.</li>
+</ol>
+<p>In this example, you could have directly defined the λ-term, but in general you will see that it is necessary to use the holes.</p>
+<p>Modify the proof so that the arguments <code>A</code> and <code>B</code> are implicit.</p>
+<h1 data-number="3" id="implication"><span class="header-section-number">3</span> Implication</h1>
+<p>We will now do some proofs in propositional logic. We recall that, under the Curry-Howard correspondence the implication <span class="math inline">\(\Rightarrow\)</span> corresponds to the arrow → of Agda. For instance, if we want to prove <span class="math inline">\(A\Rightarrow A\)</span>, we will construct a term of type <code>A → A</code>. For instance,</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>id <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> A <span class="ot">→</span> A</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>id a <span class="ot">=</span> a</span></code></pre></div>
+<h2 data-number="3.1" id="first-projection"><span class="header-section-number">3.1</span> First projection</h2>
+<p>Give a proof of <span class="math inline">\(A\Rightarrow B\Rightarrow A\)</span>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a>K <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> A <span class="ot">→</span> B <span class="ot">→</span> A</span></code></pre></div>
+<h2 data-number="3.2" id="application"><span class="header-section-number">3.2</span> Application</h2>
+<p>Give a proof of <span class="math inline">\((A\Rightarrow B)\Rightarrow A\Rightarrow B\)</span>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a>app <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> A <span class="ot">→</span> B</span></code></pre></div>
+<h2 data-number="3.3" id="flip"><span class="header-section-number">3.3</span> Flip</h2>
+<p>Give a proof of <span class="math inline">\((A\Rightarrow B\Rightarrow C)\Rightarrow B\Rightarrow A\Rightarrow C\)</span></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a>flip <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B <span class="ot">→</span> C<span class="ot">)</span> <span class="ot">→</span> B <span class="ot">→</span> A <span class="ot">→</span> C</span></code></pre></div>
+<h2 data-number="3.4" id="transitivity-composition"><span class="header-section-number">3.4</span> Transitivity / composition</h2>
+<p>Give a proof of <span class="math inline">\((A\Rightarrow B)\Rightarrow(B\Rightarrow C)\Rightarrow(A\Rightarrow C)\)</span>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>comp <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>B <span class="ot">→</span> C<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> C<span class="ot">)</span></span></code></pre></div>
+<h2 data-number="3.5" id="s"><span class="header-section-number">3.5</span> S</h2>
+<p>Give a proof of <span class="math inline">\((A\Rightarrow B\Rightarrow C)\Rightarrow(A\Rightarrow B)\Rightarrow A\Rightarrow C\)</span>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>S <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B <span class="ot">→</span> C<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> A <span class="ot">→</span> C</span></code></pre></div>
+<h1 data-number="4" id="conjunction"><span class="header-section-number">4</span> Conjunction</h1>
+<p>The <em>conjunction</em> is defined in the module <code>Data.Product</code> which you can use with</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Product <span class="kw">renaming</span> <span class="ot">(_</span>×<span class="ot">_</span> <span class="kw">to</span> <span class="ot">_</span>∧<span class="ot">_)</span></span></code></pre></div>
+<p>By default, following the Curry-Howard correspondence, the conjunction <span class="math inline">\(\land\)</span> is noted as a product × on types in Agda. However, since we focus on logic here, we use the <code>renaming</code> command in order to change the notation to the usual <code>∧</code>.</p>
+<h2 data-number="4.1" id="projections"><span class="header-section-number">4.1</span> Projections</h2>
+<p>Give a proof of <span class="math inline">\((A\land B)\Rightarrow A\)</span>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a>proj1 <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A ∧ B<span class="ot">)</span> <span class="ot">→</span> A</span></code></pre></div>
+<p>and a proof <code>proj2</code> of <span class="math inline">\((A\land B)\Rightarrow B\)</span>.</p>
+<h2 data-number="4.2" id="diagonal"><span class="header-section-number">4.2</span> Diagonal</h2>
+<p>Give a proof of <span class="math inline">\(A\Rightarrow A\land A\)</span>.</p>
+<h2 data-number="4.3" id="commutativity"><span class="header-section-number">4.3</span> Commutativity</h2>
+<p>Show that conjunction is commutative: <span class="math inline">\((A\land B)\Rightarrow(B\land A)\)</span>.</p>
+<h2 data-number="4.4" id="currying"><span class="header-section-number">4.4</span> Currying</h2>
+<p>Most functional programming languages support <a href="https://en.wikipedia.org/wiki/Currying">Currying</a> which is a principle according to which a function taking a pair of arguments can be transformed into one with two arguments and vice versa. For instance, in OCaml the functions of type</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a>&#39;a * &#39;b -&gt; &#39;c</span></code></pre></div>
+<p>are in correspondence with those of type</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a>&#39;a -&gt; &#39;b -&gt; &#39;c</span></code></pre></div>
+<p>Show that we have <span class="math inline">\((A\land B\Rightarrow C)\Rightarrow(A\Rightarrow B\Rightarrow C)\)</span>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a>curry1 <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A ∧ B <span class="ot">→</span> C<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B <span class="ot">→</span> C<span class="ot">)</span></span></code></pre></div>
+<p>and the converse implication</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a>curry2 <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B <span class="ot">→</span> C<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>A ∧ B <span class="ot">→</span> C<span class="ot">)</span></span></code></pre></div>
+<p>All connectives are defined in Agda. For instance, following the usual definition</p>
+<p><span class="math display">\[
+A \Leftrightarrow B
+\qquad=\qquad
+(A\Rightarrow B)\land(B\Rightarrow A)
+\]</span></p>
+<p>we can define equivalence in Agda by</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a>equiv <span class="ot">:</span> <span class="ot">(</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true"></a>equiv A B <span class="ot">=</span> <span class="ot">(</span>A <span class="ot">→</span> B<span class="ot">)</span> ∧ <span class="ot">(</span>B <span class="ot">→</span> A<span class="ot">)</span></span></code></pre></div>
+<p>Do you understand this notation? (if not, ask). Or better, since we like UTF-8 symbols and infix notations:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="ot">_</span>↔<span class="ot">_</span> <span class="ot">:</span> <span class="ot">(</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>A ↔ B <span class="ot">=</span> <span class="ot">(</span>A <span class="ot">→</span> B<span class="ot">)</span> ∧ <span class="ot">(</span>B <span class="ot">→</span> A<span class="ot">)</span></span></code></pre></div>
+<p>where <code>↔︎</code> is typed <code>\&lt;-&gt;</code>. With this notation, currying can now be expressed as</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true"></a>currying <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A ∧ B <span class="ot">→</span> C<span class="ot">)</span> ↔ <span class="ot">(</span>A <span class="ot">→</span> B <span class="ot">→</span> C<span class="ot">)</span></span></code></pre></div>
+<p>prove it (you can use previous proofs).</p>
+<h2 data-number="4.5" id="optional-distributivity"><span class="header-section-number">4.5</span> Optional: distributivity</h2>
+<p>Show that conjunction on the target distributes over implication: <span class="math inline">\((A\Rightarrow(B\land C))\Leftrightarrow((A\Rightarrow B)\land(A\Rightarrow C))\)</span>. You might need to generalize the type of your projections <code class="sourceCode agda">proj1</code> and <code class="sourceCode agda">proj2</code>.</p>
+<h1 data-number="5" id="disjunction"><span class="header-section-number">5</span> Disjunction</h1>
+<p><em>Disjunction</em> is defined in Agda in the module <code>Data.Sum</code>. However, in order to see how it works, we define it by hand (and use more usual notations):</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a><span class="kw">data</span> <span class="ot">_</span>∨<span class="ot">_</span> <span class="ot">(</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true"></a>  left  <span class="ot">:</span> A <span class="ot">→</span> A ∨ B</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true"></a>  right <span class="ot">:</span> B <span class="ot">→</span> A ∨ B</span></code></pre></div>
+<p>It is an inductive type, which takes two parameters (<code>A</code> and <code>B</code> of type <code>Set</code>) and returns a <code>Set</code>. It has two constructors <code>left</code> and <code>right</code> which respectively take an element of type <code>A</code> and <code>B</code> as argument.</p>
+<h2 data-number="5.1" id="elimination-rule"><span class="header-section-number">5.1</span> Elimination rule</h2>
+<p>Show the elimination rule for disjunction:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true"></a>or-elim <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A ∨ B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> C<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>B <span class="ot">→</span> C<span class="ot">)</span> <span class="ot">→</span> C</span></code></pre></div>
+<h2 data-number="5.2" id="commutativity-1"><span class="header-section-number">5.2</span> Commutativity</h2>
+<p>Show that disjunction is commutative.</p>
+<h2 data-number="5.3" id="distributivity"><span class="header-section-number">5.3</span> Distributivity</h2>
+<p>Show that conjunction distributes over disjunction.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a>dist <span class="ot">:</span> <span class="ot">{</span>A B C <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A ∧ <span class="ot">(</span>B ∨ C<span class="ot">))</span> <span class="ot">→</span> <span class="ot">(</span>A ∧ B<span class="ot">)</span> ∨ <span class="ot">(</span>A ∧ C<span class="ot">)</span></span></code></pre></div>
+<h1 data-number="6" id="negation"><span class="header-section-number">6</span> Negation</h1>
+<h2 data-number="6.1" id="falsity"><span class="header-section-number">6.1</span> Falsity</h2>
+<p>We define <em>falsity</em> as</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="kw">data</span> ⊥ <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span></code></pre></div>
+<p>which is an inductive type with no constructor.</p>
+<p>Show the elimination rule</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true"></a>⊥-elim <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> ⊥ <span class="ot">→</span> A</span></code></pre></div>
+<h2 data-number="6.2" id="negation-1"><span class="header-section-number">6.2</span> Negation</h2>
+<p>Define <em>negation</em> as a function</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true"></a>¬ <span class="ot">:</span> <span class="dt">Set</span> <span class="ot">→</span> <span class="dt">Set</span></span></code></pre></div>
+<h2 data-number="6.3" id="contradiction"><span class="header-section-number">6.3</span> Contradiction</h2>
+<p>Show the principle of contradiction:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true"></a>contr <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>¬ B <span class="ot">→</span> ¬ A<span class="ot">)</span></span></code></pre></div>
+<h2 data-number="6.4" id="non-contradiction"><span class="header-section-number">6.4</span> Non-contradiction</h2>
+<p>Show the principle of non-contradiction:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true"></a>non-contr <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> ¬ <span class="ot">(</span>A ∧ ¬ A<span class="ot">)</span></span></code></pre></div>
+<h2 data-number="6.5" id="double-negation-introduction"><span class="header-section-number">6.5</span> Double negation introduction</h2>
+<p>Show the rule of introduction of double negation:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true"></a>nni <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> A <span class="ot">→</span> ¬ <span class="ot">(</span>¬ A<span class="ot">)</span></span></code></pre></div>
+<h2 data-number="6.6" id="double-negation-elimination-on-bot"><span class="header-section-number">6.6</span> Double negation elimination on <span class="math inline">\(\bot\)</span></h2>
+<p>Show that the principle of elimination of double negation is valid on <span class="math inline">\(\bot\)</span>:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true"></a>⊥-nne <span class="ot">:</span> ¬ <span class="ot">(</span>¬ ⊥<span class="ot">)</span> <span class="ot">→</span> ⊥</span></code></pre></div>
+<h2 data-number="6.7" id="elimination-of-negation"><span class="header-section-number">6.7</span> Elimination of negation</h2>
+<p>Show the principle of elimination of negation:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true"></a>¬-elim <span class="ot">:</span> ¬ A <span class="ot">→</span> A <span class="ot">→</span> B</span></code></pre></div>
+<h2 data-number="6.8" id="non-falsifiability-of-the-law-of-excluded-middle"><span class="header-section-number">6.8</span> Non-falsifiability of the law of excluded middle</h2>
+<p>Show that the law of excluded middle is not falsifiable:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true"></a>nnlem <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> ¬ <span class="ot">(</span>¬ <span class="ot">(</span>A ∨ ¬ A<span class="ot">))</span></span></code></pre></div>
+<h2 data-number="6.9" id="russells-paradox"><span class="header-section-number">6.9</span> Russell’s paradox</h2>
+<p>Show the following logical counterpart of <a href="https://en.wikipedia.org/wiki/Russell%27s_paradox">Russell’s paradox</a>:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true"></a>rp <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> ¬ A<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>¬ A <span class="ot">→</span> A<span class="ot">)</span> <span class="ot">→</span> ⊥</span></code></pre></div>
+<h1 data-number="7" id="truth"><span class="header-section-number">7</span> Truth</h1>
+<h2 data-number="7.1" id="definition"><span class="header-section-number">7.1</span> Definition</h2>
+<p>Define truth <code>⊤</code> as an inductive type.</p>
+<h2 data-number="7.2" id="strengthening"><span class="header-section-number">7.2</span> ⊤-strengthening</h2>
+<p>Show that the hypothesis <span class="math inline">\(\top\)</span> is always superfluous:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true"></a>ti <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>⊤ <span class="ot">→</span> A<span class="ot">)</span> <span class="ot">→</span> A</span></code></pre></div>
+<h2 data-number="7.3" id="de-morgan"><span class="header-section-number">7.3</span> De Morgan</h2>
+<p>Show the de Morgan laws</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true"></a>dmnt <span class="ot">:</span> ¬ ⊤ <span class="ot">→</span> ⊥</span></code></pre></div>
+<p>and</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true"></a>dmtn <span class="ot">:</span> ⊥ <span class="ot">→</span> ¬ ⊤</span></code></pre></div>
+<h1 data-number="8" id="classical-logic"><span class="header-section-number">8</span> Classical logic</h1>
+<h2 data-number="8.1" id="equivalence-between-excluded-middle-and-double-negation-elimination"><span class="header-section-number">8.1</span> Equivalence between excluded middle and double negation elimination</h2>
+<p>We define the excluded middle principle by</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true"></a>lem <span class="ot">:</span> <span class="dt">Set₁</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true"></a>lem <span class="ot">=</span> <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> A ∨ ¬ A</span></code></pre></div>
+<p>and double negation elimination by</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true"></a>nne <span class="ot">:</span> <span class="dt">Set₁</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true"></a>nne <span class="ot">=</span> <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> ¬ <span class="ot">(</span>¬ A<span class="ot">)</span> <span class="ot">→</span> A</span></code></pre></div>
+<p>Show that lem implies nne:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true"></a>nne-lem <span class="ot">:</span> nne <span class="ot">→</span> lem</span></code></pre></div>
+<p>Show the converse implication:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true"></a>lem-nne <span class="ot">:</span> lem <span class="ot">→</span> nne</span></code></pre></div>
+<p>It can be useful to first show:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true"></a>lem-nne&#39; <span class="ot">:</span> <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>A ∨ ¬ A<span class="ot">)</span> <span class="ot">→</span> ¬ <span class="ot">(</span>¬ A<span class="ot">)</span> <span class="ot">→</span> A</span></code></pre></div>
+<h2 data-number="8.2" id="pierce-law"><span class="header-section-number">8.2</span> Pierce law</h2>
+<p>Show that the two above principles are equivalent to the <em>Pierce law</em>:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true"></a>pierce <span class="ot">:</span> <span class="dt">Set₁</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true"></a>pierce <span class="ot">=</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">((</span>A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> A<span class="ot">)</span> <span class="ot">→</span> A</span></code></pre></div>
+</body>
+</html>

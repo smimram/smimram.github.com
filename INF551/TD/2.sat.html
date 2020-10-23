@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram (inspired of Stéphane Lengrand)" />
+  <title>Satisfiability of boolean formulas</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Satisfiability of boolean formulas</h1>
+<p class="author">Samuel Mimram (inspired of <a href="http://www.enseignement.polytechnique.fr/informatique/INF551/TD/TD1/index.html">Stéphane Lengrand</a>)</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#simple-method"><span class="toc-section-number">1</span> Simple method</a>
+<ul>
+<li><a href="#formulas"><span class="toc-section-number">1.1</span> Formulas</a></li>
+<li><a href="#substitution"><span class="toc-section-number">1.2</span> Substitution</a></li>
+<li><a href="#free-variables"><span class="toc-section-number">1.3</span> Free variables</a></li>
+<li><a href="#evaluation"><span class="toc-section-number">1.4</span> Evaluation</a></li>
+<li><a href="#satisfiability"><span class="toc-section-number">1.5</span> Satisfiability</a></li>
+</ul></li>
+<li><a href="#dpll"><span class="toc-section-number">2</span> DPLL</a>
+<ul>
+<li><a href="#operations-on-lists"><span class="toc-section-number">2.1</span> Operations on lists</a></li>
+<li><a href="#substitution-1"><span class="toc-section-number">2.2</span> Substitution</a></li>
+<li><a href="#simple-satisfiability"><span class="toc-section-number">2.3</span> Simple satisfiability</a></li>
+<li><a href="#unitary-clauses"><span class="toc-section-number">2.4</span> Unitary clauses</a></li>
+<li><a href="#pure-literals"><span class="toc-section-number">2.5</span> Pure literals</a></li>
+<li><a href="#the-dpll-algorithm"><span class="toc-section-number">2.6</span> The DPLL algorithm</a></li>
+<li><a href="#optional-the-mom-heuristics"><span class="toc-section-number">2.7</span> Optional: the MOM heuristics</a></li>
+<li><a href="#optional-the-jeroslow-wang-heuristics"><span class="toc-section-number">2.8</span> Optional: the Jeroslow-Wang heuristics</a></li>
+</ul></li>
+<li><a href="#testing"><span class="toc-section-number">3</span> Testing</a>
+<ul>
+<li><a href="#cnf-files"><span class="toc-section-number">3.1</span> CNF files</a></li>
+<li><a href="#a-sudoku-solver"><span class="toc-section-number">3.2</span> A Sudoku solver</a></li>
+</ul></li>
+<li><a href="#putting-in-conjunctive-normal-form"><span class="toc-section-number">4</span> Putting in conjunctive normal form</a></li>
+</ul>
+</nav>
+<p>The goal of this exercise is to solve the <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">satisfiability problem for boolean formulas</a>, which consists in determining whether a propositional formula is <em>satisfiable</em>, i.e. is true under some valuation.</p>
+<p>Open a new file <code>sat.ml</code>.</p>
+<h1 data-number="1" id="simple-method" data-number="1"><span class="header-section-number">1</span> Simple method</h1>
+<h2 data-number="1.1" id="formulas" data-number="1.1"><span class="header-section-number">1.1</span> Formulas</h2>
+<p>We define a type</p>
+<pre class="(ocaml)"><code>type var = int</code></pre>
+<p>for variables. A <em>propositional formula</em> is either</p>
+<ul>
+<li>a variable,</li>
+<li>a conjunction or a disjunction of formulas,</li>
+<li>a negation of a formula</li>
+<li>true or false.</li>
+</ul>
+<p>Define a type <code>formula</code> for formulas (the constructors should be named <code>Var</code>, <code>And</code>, <code>Or</code>, <code>Not</code>, <code>True</code> and <code>False</code>).</p>
+<h2 data-number="1.2" id="substitution" data-number="1.2"><span class="header-section-number">1.2</span> Substitution</h2>
+<p>Define a <em>substitution</em> procedure <code class="sourceCode ocaml">subst</code> of type <code class="sourceCode ocaml">var -&gt; formula -&gt; formula -&gt; formula</code> which replaces a given variable <span class="math inline">\(X\)</span> by a formula <span class="math inline">\(B\)</span> in a formula <span class="math inline">\(A\)</span>. In mathematical notation, the resulting formula is often noted <span class="math inline">\(A[B/X]\)</span>. In order to test whether you have a precise variable <code class="sourceCode ocaml">v</code>, in your match you should not write</p>
+<pre class="(ocaml)"><code>| Var v -&gt; ...</code></pre>
+<p>(which will match any variable) but</p>
+<pre class="(ocaml)"><code>| Var x when x = v -&gt; ...</code></pre>
+<h2 data-number="1.3" id="free-variables" data-number="1.3"><span class="header-section-number">1.3</span> Free variables</h2>
+<p>Define a function <code class="sourceCode ocaml">free_var</code> of type <code class="sourceCode ocaml">formula -&gt; var</code> which returns an arbitrary <em>free variable</em> of the formula (a variable which occurs in the formula). In the case where there is no such variable, the exception <code class="sourceCode ocaml"><span class="dt">Not_found</span></code> will be raised.</p>
+<h2 data-number="1.4" id="evaluation" data-number="1.4"><span class="header-section-number">1.4</span> Evaluation</h2>
+<p>Define a function <code class="sourceCode ocaml">eval</code> of type <code class="sourceCode ocaml">formula -&gt; <span class="dt">bool</span></code> which evaluates a <em>closed formula</em> (a formula without free variables).</p>
+<h2 data-number="1.5" id="satisfiability" data-number="1.5"><span class="header-section-number">1.5</span> Satisfiability</h2>
+<p>We admit that a formula <span class="math inline">\(A\)</span> with a free variable <span class="math inline">\(X\)</span> is satisfiable if and only if either <span class="math inline">\(A[\top/X]\)</span> or <span class="math inline">\(A[\bot/X]\)</span> is satisfiable: trying both cases is called <em>splitting</em> on <span class="math inline">\(X\)</span>.</p>
+<p>Define a function <code class="sourceCode ocaml">sat</code> of type <code class="sourceCode ocaml">formula -&gt; <span class="dt">bool</span></code> which determines whether a formula is satisfiable.</p>
+<p>You can test it with</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>  <span class="kw">let</span> x = Var <span class="dv">0</span> <span class="kw">in</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>  <span class="kw">let</span> x&#39;= Not x <span class="kw">in</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a>  <span class="kw">let</span> y = Var <span class="dv">1</span> <span class="kw">in</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a>  <span class="kw">let</span> y&#39;= Not y <span class="kw">in</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true"></a>  <span class="kw">let</span> a = And (And(Or (x,y), Or (x&#39;,y)), Or (x&#39;,y&#39;)) <span class="kw">in</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true"></a>  <span class="kw">let</span> b = And (And(Or (x,y), Or (x&#39;,y)), And(Or (x,y&#39;), Or (x&#39;,y&#39;))) <span class="kw">in</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true"></a>  <span class="kw">assert</span> (sat a);</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true"></a>  <span class="kw">assert</span> (<span class="dt">not</span> (sat b))</span></code></pre></div>
+<p>and add your own tests! The <code class="sourceCode ocaml"><span class="kw">assert</span></code> function will raise an exception if its argument is <code class="sourceCode ocaml"><span class="kw">false</span></code> (try to <code class="sourceCode ocaml"><span class="kw">assert</span> <span class="kw">false</span></code>).</p>
+<h1 data-number="2" id="dpll" data-number="2"><span class="header-section-number">2</span> DPLL</h1>
+<p>In practice, the above procedure is very slow and could be improved. For instance, on the formula <span class="math display">\[X\land\lnot X\land X_1\land\ldots\land X_n\]</span> it will try all the possible valuations for <span class="math inline">\(X_1,\ldots,X_n\)</span>, whereas it is easy to see that it cannot be satisfied for <span class="math inline">\(X=\top\)</span> and <span class="math inline">\(X=\bot\)</span>, independently of the values of the other variables.</p>
+<p>We now implement the <a href="https://en.wikipedia.org/wiki/DPLL_algorithm">DPLL algorithm</a> on which are based most modern SAT solvers. It works much faster in practice, although the problem <a href="https://en.wikipedia.org/wiki/Cook%E2%80%93Levin_theorem">is NP-complete</a>. We admit that every boolean formula can be put into a <em>conjunctive normal form</em> (or <em>cnf</em>):</p>
+<ul>
+<li>a <em>literal</em> is either a variable or the negation of a variable,</li>
+<li>a <em>clause</em> is a disjunction of literals,</li>
+<li>a <em>conjunctive normal form</em> is a conjunction of clauses.</li>
+</ul>
+<p>and we aim at determining the satisfiability of such formulas. They can be represented by the following types:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="kw">type</span> var = <span class="dt">int</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a><span class="kw">type</span> literal = <span class="dt">bool</span> * var <span class="co">(* false means negated *)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a><span class="kw">type</span> clause = literal <span class="dt">list</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a><span class="kw">type</span> cnf = clause <span class="dt">list</span></span></code></pre></div>
+<p>Note that the cnf <code>[]</code> corresponds to true whereas the clause <code>[]</code> corresponds to false.</p>
+<h2 data-number="2.1" id="operations-on-lists" data-number="2.1"><span class="header-section-number">2.1</span> Operations on lists</h2>
+<p>We will be using standard operations on lists. They are part of the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html">List module</a> of the standard library, but we shall recode them here as an exercise.</p>
+<p>Define a function <code class="sourceCode ocaml">list_mem</code> of type <code class="sourceCode ocaml">&#39;a -&gt; &#39;a <span class="dt">list</span> -&gt; <span class="dt">bool</span></code> which determines whether an element is present in a list. Test it with</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>  <span class="kw">assert</span> (list_mem <span class="dv">2</span> [<span class="dv">1</span>;<span class="dv">2</span>;<span class="dv">3</span>]);</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>  <span class="kw">assert</span> (<span class="dt">not</span> (list_mem <span class="dv">5</span> [<span class="dv">1</span>;<span class="dv">2</span>;<span class="dv">3</span>]));</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a>  <span class="kw">assert</span> (<span class="dt">not</span> (list_mem <span class="dv">1</span> []))</span></code></pre></div>
+<p>Define a function <code class="sourceCode ocaml">list_map</code> of type <code class="sourceCode ocaml">(&#39;a -&gt; &#39;b) -&gt; &#39;a <span class="dt">list</span> -&gt; &#39;b <span class="dt">list</span></code> which applies a function to every element of a list. Test it with</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>  <span class="kw">assert</span> (list_map (<span class="kw">fun</span> x -&gt; <span class="dv">2</span>*x) [<span class="dv">1</span>;<span class="dv">2</span>;<span class="dv">3</span>] = [<span class="dv">2</span>;<span class="dv">4</span>;<span class="dv">6</span>]);</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a>  <span class="kw">assert</span> (list_map (<span class="kw">fun</span> _ -&gt; ()) [] = [])</span></code></pre></div>
+<p>Define a function <code class="sourceCode ocaml">list_filter</code> of type <code class="sourceCode ocaml">(&#39;a -&gt; <span class="dt">bool</span>) -&gt; &#39;a <span class="dt">list</span> -&gt; &#39;a <span class="dt">list</span></code> which, in a list, keeps only the elements satisfying a given predicate.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>  <span class="kw">let</span> even x = x <span class="kw">mod</span> <span class="dv">2</span> = <span class="dv">0</span> <span class="kw">in</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>  <span class="kw">assert</span> (list_filter even [<span class="dv">1</span>;<span class="dv">2</span>;<span class="dv">3</span>;<span class="dv">4</span>;<span class="dv">6</span>] = [<span class="dv">2</span>;<span class="dv">4</span>;<span class="dv">6</span>])</span></code></pre></div>
+<h2 data-number="2.2" id="substitution-1" data-number="2.2"><span class="header-section-number">2.2</span> Substitution</h2>
+<p>Observe that, given a variable <span class="math inline">\(X\)</span> and a formula in cnf <span class="math display">\[A=C_1\land\ldots\land
+C_n\]</span> where the <span class="math inline">\(C_i\)</span> are the clauses, a cnf for the formula <span class="math inline">\(A[\top/X]\)</span> can be obtained from <span class="math inline">\(A\)</span> by</p>
+<ul>
+<li>removing all the clauses <span class="math inline">\(C_i\)</span> containing <span class="math inline">\(X\)</span>,</li>
+<li>removing <span class="math inline">\(\lnot X\)</span> from all the remaining clauses.</li>
+</ul>
+<p>and similarly for <span class="math inline">\(A[\bot/X]\)</span>. Can you see why?</p>
+<p>Using the functions on lists coded above, implement a <em>substitution</em> function <code class="sourceCode ocaml">subst_cnf</code> of type <code class="sourceCode ocaml">var -&gt; <span class="dt">bool</span> -&gt; cnf -&gt; cnf</code> which replaces a variable <span class="math inline">\(X\)</span> by either <span class="math inline">\(\top\)</span> or <span class="math inline">\(\bot\)</span> in a formula in cnf.</p>
+<h2 data-number="2.3" id="simple-satisfiability" data-number="2.3"><span class="header-section-number">2.3</span> Simple satisfiability</h2>
+<p>Implement again the function <code class="sourceCode ocaml">dpll</code> of type <code class="sourceCode ocaml">cnf -&gt; <span class="dt">bool</span></code>, using splitting as in the first part, but noting that</p>
+<ul>
+<li>the cnf <code>[]</code> is true,</li>
+<li>a cnf containing the clause <code>[]</code> is false</li>
+</ul>
+<p>(in particular, a cnf without free variables is in one of those two cases). This should allow to conclude that a formula is not satisfiable without giving a value to every variable. You can use the function <code class="sourceCode ocaml"><span class="dt">List</span>.hd</code> of type <code class="sourceCode ocaml">&#39;a <span class="dt">list</span> -&gt; &#39;a</code> which returns the first element of a list (or raises <code>Not_found</code> if the list is empty). We also recall that you can extract the first and second components of a pair with the functions <code class="sourceCode ocaml"><span class="dt">fst</span></code> and <code class="sourceCode ocaml"><span class="dt">snd</span></code>.</p>
+<p>Test your function with the same example as previously:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>  <span class="kw">let</span> x = <span class="kw">true</span>, <span class="dv">0</span> <span class="kw">in</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>  <span class="kw">let</span> x&#39;= <span class="kw">false</span>,<span class="dv">0</span> <span class="kw">in</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a>  <span class="kw">let</span> y = <span class="kw">true</span>, <span class="dv">1</span> <span class="kw">in</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>  <span class="kw">let</span> y&#39;= <span class="kw">false</span>,<span class="dv">1</span> <span class="kw">in</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>  <span class="kw">let</span> a = [[x;y]; [x&#39;;y]; [x&#39;;y&#39;]] <span class="kw">in</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>  <span class="kw">let</span> b = [[x;y]; [x&#39;;y]; [x;y&#39;]; [x&#39;;y&#39;]] <span class="kw">in</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a>  <span class="kw">assert</span> (dpll a);</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>  <span class="kw">assert</span> (<span class="dt">not</span> (dpll b))</span></code></pre></div>
+<p>The algorithm can be further improved by carefully choosing the variables on which we split. In particular, we should eliminate first the variables for which we will easily be able to conclude (at least one branch of the splitting).</p>
+<h2 data-number="2.4" id="unitary-clauses" data-number="2.4"><span class="header-section-number">2.4</span> Unitary clauses</h2>
+<p>A clause <span class="math inline">\(C_i\)</span> is <em>unitary</em> when it is reduced to a literal. If <span class="math inline">\(C_i=X\)</span>, we know that <span class="math inline">\(X\)</span> must be true in order for the formula to be satisfied (the case <span class="math inline">\(X=\bot\)</span> will immediately fail), and similarly in the case where <span class="math inline">\(C_i=\lnot X\)</span>.</p>
+<p>Program a function <code class="sourceCode ocaml"><span class="dt">unit</span></code> of type <code class="sourceCode ocaml">cnf -&gt; literal</code> which finds a unitary clause in a formula (or raises <code>Not_found</code> if there is none).</p>
+<p>Test it with</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true"></a>  <span class="kw">let</span> x = <span class="kw">true</span>, <span class="dv">0</span> <span class="kw">in</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true"></a>  <span class="kw">let</span> y = <span class="kw">true</span>, <span class="dv">1</span> <span class="kw">in</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true"></a>  <span class="kw">let</span> y&#39;= <span class="kw">false</span>,<span class="dv">1</span> <span class="kw">in</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true"></a>  <span class="kw">assert</span> (<span class="dt">unit</span> [[x;y]; [x]; [y;y&#39;]] = x)</span></code></pre></div>
+<h2 data-number="2.5" id="pure-literals" data-number="2.5"><span class="header-section-number">2.5</span> Pure literals</h2>
+<p>A literal <span class="math inline">\(X\)</span> (resp. <span class="math inline">\(\lnot X\)</span>) is <em>pure</em> in a formula <span class="math inline">\(A\)</span> if <span class="math inline">\(\lnot X\)</span> (resp. <span class="math inline">\(X\)</span>) does not occur in any clause of <span class="math inline">\(A\)</span> (i.e. the variable always occurs with the same polarity). What can we say of the satisfiability of a formula which contains a pure literal?</p>
+<p>Program a function <code class="sourceCode ocaml">pure</code> of type <code class="sourceCode ocaml">cnf -&gt; literal</code> which finds a pure literal in a formula (or raises <code>Not_found</code> if there is none).</p>
+<h2 data-number="2.6" id="the-dpll-algorithm" data-number="2.6"><span class="header-section-number">2.6</span> The DPLL algorithm</h2>
+<p>Modify the function <code class="sourceCode ocaml">dpll</code> so that it operates in the following way on a given cnf</p>
+<ul>
+<li>if the formula is empty then it returns <code>true</code>,</li>
+<li>if the formula contains the empty clause then it returns <code>false</code>,</li>
+<li>if the formula contains a unitary clause then it replaces the corresponding variable by the only possible value,</li>
+<li>if the formula contains a pure literal then it replaces the corresponding variable by the value which preserves satisfiability,</li>
+<li>otherwise, it splits on an arbitrary variable.</li>
+</ul>
+<h2 data-number="2.7" id="optional-the-mom-heuristics" data-number="2.7"><span class="header-section-number">2.7</span> Optional: the MOM heuristics</h2>
+<p>In the last case, we can still (hope to) improve the algorithm by carefully choosing the variables on which we split. The <em>MOM heuristics</em> (for Maximum number of Occurences in the Minimum length) consists in choosing a variable which occurs most among clauses of minimal length.</p>
+<p>Program a function <code class="sourceCode ocaml">mom</code> of type <code class="sourceCode ocaml">cnf -&gt; var</code> which finds such a variable (or raises <code>Not_found</code> if the formula has no variable), and use it in <code>dpll</code>.</p>
+<h2 data-number="2.8" id="optional-the-jeroslow-wang-heuristics" data-number="2.8"><span class="header-section-number">2.8</span> Optional: the Jeroslow-Wang heuristics</h2>
+<p>Given a clause <span class="math inline">\(C\)</span>, we write <span class="math inline">\(|C|\)</span> for the number of literals in <span class="math inline">\(C\)</span>. Given a formula <span class="math inline">\(A\)</span> and a literal <span class="math inline">\(L\)</span>, we write <span class="math inline">\(C\in_L A\)</span> to indicate that <span class="math inline">\(C\)</span> is a clause of <span class="math inline">\(A\)</span> containing <span class="math inline">\(L\)</span> and define <span class="math display">\[\mathcal{J}(L)=\sum_{C\in_L
+A}\left(\frac12\right)^{|C|}\]</span> The <em>Jeroslow-Wang heuristics</em> consists in splitting on the variable corresponding to a literal which maximizes <span class="math inline">\(\mathcal{J}\)</span>.</p>
+<p>Program a function <code class="sourceCode ocaml">jw</code> of type <code class="sourceCode ocaml">cnf -&gt; literal -&gt; <span class="dt">float</span></code> which computes the above quantity.</p>
+<p>Program a function <code class="sourceCode ocaml">jw_var</code> of type <code class="sourceCode ocaml">cnf -&gt; var</code> which finds a variable according to the Jeroslow-Wang heuristics, and use it in <code class="sourceCode ocaml">dpll</code>.</p>
+<h1 data-number="3" id="testing" data-number="3"><span class="header-section-number">3</span> Testing</h1>
+<p>The <a href="https://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html">CNF file format</a> is a text format to encode SAT problems, of which you can find <a href="https://www.cs.ubc.ca/~hoos/SATLIB/benchm.html">many examples</a> on the net.</p>
+<h2 data-number="3.1" id="cnf-files" data-number="3.1"><span class="header-section-number">3.1</span> CNF files</h2>
+<p>A parser for the CNF file format can be implemented as follows:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="co">(** Parse a CNF file. *)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a><span class="kw">let</span> parse f : cnf =</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a>  <span class="kw">let</span> load_file f =</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true"></a>    <span class="kw">let</span> ic = <span class="dt">open_in</span> f <span class="kw">in</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true"></a>    <span class="kw">let</span> n = <span class="dt">in_channel_length</span> ic <span class="kw">in</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true"></a>    <span class="kw">let</span> s = <span class="dt">Bytes</span>.create n <span class="kw">in</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true"></a>    <span class="dt">really_input</span> ic s <span class="dv">0</span> n;</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true"></a>    <span class="dt">close_in</span> ic;</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true"></a>    <span class="dt">Bytes</span>.to_string s</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true"></a>  <span class="kw">in</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true"></a>  <span class="kw">let</span> f = load_file f <span class="kw">in</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true"></a>  <span class="kw">let</span> f = <span class="dt">String</span>.map (<span class="kw">function</span> <span class="ch">&#39;\t&#39;</span> -&gt; <span class="ch">&#39; &#39;</span> | c -&gt; c) f <span class="kw">in</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true"></a>  <span class="kw">let</span> f = <span class="dt">String</span>.split_on_char <span class="ch">&#39;\n&#39;</span> f <span class="kw">in</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true"></a>  <span class="kw">let</span> f = <span class="dt">List</span>.map (<span class="dt">String</span>.split_on_char <span class="ch">&#39; &#39;</span>) f <span class="kw">in</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true"></a>  <span class="kw">let</span> f = <span class="dt">List</span>.filter (<span class="kw">function</span> <span class="st">&quot;c&quot;</span>::_ | <span class="st">&quot;p&quot;</span>::_ -&gt; <span class="kw">false</span> | _ -&gt; <span class="kw">true</span>) f <span class="kw">in</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true"></a>  <span class="kw">let</span> f = <span class="dt">List</span>.flatten f <span class="kw">in</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true"></a>  <span class="kw">let</span> aux (a,c) = <span class="kw">function</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true"></a>    | <span class="st">&quot;&quot;</span> -&gt; (a,c)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true"></a>    | <span class="st">&quot;0&quot;</span> -&gt; (c::a,[])</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true"></a>    | n -&gt;</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true"></a>       <span class="kw">let</span> n = <span class="dt">int_of_string</span> n <span class="kw">in</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true"></a>       <span class="kw">let</span> x = <span class="kw">if</span> n &lt; <span class="dv">0</span> <span class="kw">then</span> (<span class="kw">false</span>,-n) <span class="kw">else</span> (<span class="kw">true</span>,n) <span class="kw">in</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true"></a>       (a,x::c)</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true"></a>  <span class="kw">in</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true"></a>  <span class="dt">fst</span> (<span class="dt">List</span>.fold_left aux ([],[]) f)</span></code></pre></div>
+<p>You can then test the file <code>file.cnf</code> by something like</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="kw">let</span> () = <span class="kw">assert</span> (dpll (parse <span class="st">&quot;file.cnf&quot;</span>))</span></code></pre></div>
+<p>It is advised that you compile your program in native mode, so that it is faster, by typing on a console</p>
+<pre><code>ocamlopt sat.ml -o sat</code></pre>
+<p>You can then run the program with</p>
+<pre><code>./sat</code></pre>
+<p>You can even pass a file name as argument by executing</p>
+<pre><code>./sat file.cnf</code></pre>
+<p>and the file name can be retrieved in OCaml with <code class="sourceCode ocaml"><span class="dt">Sys</span>.argv.(<span class="dv">0</span>)</code> (see <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/Sys.html">the documentation</a>).</p>
+<p>Here are some examples of satisfiable files:</p>
+<ul>
+<li><a href="doc/cnf/SAT/ais12.cnf">ais12.cnf</a></li>
+<li><a href="doc/cnf/SAT/flat50-1000.cnf">flat50-1000.cnf</a></li>
+<li><a href="doc/cnf/SAT/ii8a2.cnf">ii8a2.cnf</a></li>
+<li><a href="doc/cnf/SAT/quinn.cnf">quinn.cnf</a></li>
+<li><a href="doc/cnf/SAT/zebra_v155_c1135.cnf">zebra_v155_c1135.cnf</a></li>
+</ul>
+<p>and unsatisfiable ones:</p>
+<ul>
+<li><a href="doc/cnf/UNSAT/aim-50-1_6-no-1.cnf">aim-50-1_6-no-1.cnf</a></li>
+<li><a href="doc/cnf/UNSAT/bf1355-075.cnf">bf1355-075.cnf</a></li>
+<li><a href="doc/cnf/UNSAT/dubois20.cnf">dubois20.cnf</a></li>
+<li><a href="doc/cnf/UNSAT/dubois21.cnf">dubois21.cnf</a></li>
+<li><a href="doc/cnf/UNSAT/hole6.cnf">hole6.cnf</a></li>
+</ul>
+<h2 data-number="3.2" id="a-sudoku-solver" data-number="3.2"><span class="header-section-number">3.2</span> A Sudoku solver</h2>
+<p>A <a href="https://en.wikipedia.org/wiki/Sudoku">Sudoku</a> can be encoded as a 9×9 matrix <code>cells</code> of integers such that <code>cells.(i).(j)</code><span class="math inline">\(=9\)</span> means that the cell <span class="math inline">\((i,j)\)</span> is empty and <span class="math inline">\(0\leq\)</span><code>cell.(i).(j)</code><span class="math inline">\(&lt;9\)</span> means that the cell contains the number <code>cells.(i).(j)</code><span class="math inline">\(+1\)</span>. For instance, the game</p>
+<table style="width:33%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>. . 8<br />
+6 5 .<br />
+. 2 1</td>
+<td>. 9 3<br />
+4 . 2<br />
+. 8 .</td>
+<td>5 . .<br />
+. . .<br />
+3 . .</td>
+</tr>
+<tr class="even">
+<td>3 8 .<br />
+. 7 .<br />
+1 . 9</td>
+<td>. 6 .<br />
+. . .<br />
+. 4 .</td>
+<td>2 . 9<br />
+. 1 .<br />
+. 7 3</td>
+</tr>
+<tr class="odd">
+<td>. . 5<br />
+. . .<br />
+. . 6</td>
+<td>. 1 .<br />
+3 . 9<br />
+8 2 .</td>
+<td>7 3 .<br />
+. 2 6<br />
+1 . .</td>
+</tr>
+</tbody>
+</table>
+<p>is encoded as</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="kw">let</span> simple_sudoku =</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true"></a>  [|[|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">2</span>;<span class="dv">4</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true"></a>    [|<span class="dv">5</span>;<span class="dv">4</span>;<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">9</span>;<span class="dv">2</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true"></a>    [|<span class="dv">2</span>;<span class="dv">7</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">5</span>;<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">8</span>|];</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">9</span>|];</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true"></a>    [|<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">2</span>|];</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">4</span>;<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">2</span>;<span class="dv">9</span>|];</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">2</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">5</span>|];</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">5</span>;<span class="dv">7</span>;<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">9</span>|]|]</span></code></pre></div>
+<p>Our aim is now to encode such a game as a SAT problem. We define</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="kw">let</span> var i j n : var =</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>  <span class="kw">let</span> i = i <span class="kw">mod</span> <span class="dv">9</span> <span class="kw">in</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true"></a>  <span class="kw">let</span> j = j <span class="kw">mod</span> <span class="dv">9</span> <span class="kw">in</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true"></a>  <span class="dv">9</span>*(<span class="dv">9</span>*i+j)+n</span></code></pre></div>
+<p>the function which returns a variable depending on <span class="math inline">\(0\leq i&lt;9\)</span>, <span class="math inline">\(0\leq j&lt;9\)</span> and <span class="math inline">\(0\leq n&lt;9\)</span>. In a valuation, the value of <code>var i j n</code> is true means that the cell <span class="math inline">\((i,j)\)</span> contains the value <span class="math inline">\(n\)</span>. We now want to generate formulas which encode the fact that a valuation gives rise to a solution to a sudoku game.</p>
+<p>Define a function <code class="sourceCode ocaml">sudoku</code> of type <code class="sourceCode ocaml"><span class="dt">int</span> <span class="dt">array</span> <span class="dt">array</span> -&gt; cnf</code>, which takes a Sudoku game as above, and returns a cnf which is satisfiable if and only if the Sudoku game is. The function must generate formulas expressing that</p>
+<ul>
+<li>there is at least one number in each cell,</li>
+<li>each number occurs at most once in a row,</li>
+<li>each number occurs at most once in a column,</li>
+<li>each number occurs at most once in a square,</li>
+<li>the solution respect the game given in argument.</li>
+</ul>
+<p>It can be shown that these conditions suffice (e.g. they imply that there is at most one number in a cell).</p>
+<p>Test it with</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true"></a>  <span class="kw">assert</span> (dpll (sudoku simple_sudoku))</span></code></pre></div>
+<p>Here is also an example of a game of medium difficulty:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a><span class="kw">let</span> medium_sudoku =</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true"></a>  [|[|<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">4</span>;<span class="dv">3</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">5</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">7</span>|];</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">8</span>|];</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true"></a>    [|<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">2</span>|];</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">4</span>;<span class="dv">2</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">5</span>;<span class="dv">1</span>;<span class="dv">9</span>|];</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true"></a>    [|<span class="dv">7</span>;<span class="dv">8</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">6</span>|];</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true"></a>    [|<span class="dv">3</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">5</span>;<span class="dv">9</span>|];</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true"></a>    [|<span class="dv">2</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">5</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">9</span>|]|]</span></code></pre></div>
+<p>a hard one:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true"></a><span class="kw">let</span> hard_sudoku =</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true"></a>  [|[|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">4</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true"></a>    [|<span class="dv">8</span>;<span class="dv">7</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">4</span>;<span class="dv">9</span>|];</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">4</span>;<span class="dv">6</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">2</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">6</span>;<span class="dv">9</span>|];</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">5</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">5</span>;<span class="dv">2</span>;<span class="dv">9</span>|];</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">0</span>|];</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">9</span>;<span class="dv">2</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|]|]</span></code></pre></div>
+<p>and an unsolvable one:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a><span class="kw">let</span> unsolvable_sudoku =</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true"></a>  [|[|<span class="dv">1</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">5</span>;<span class="dv">9</span>|];</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true"></a>    [|<span class="dv">4</span>;<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">5</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">9</span>;<span class="dv">6</span>|];</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">3</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">8</span>;<span class="dv">7</span>;<span class="dv">9</span>;<span class="dv">1</span>;<span class="dv">2</span>|];</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">2</span>;<span class="dv">9</span>;<span class="dv">7</span>;<span class="dv">9</span>|];</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">4</span>;<span class="dv">9</span>;<span class="dv">0</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|];</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true"></a>    [|<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">6</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>;<span class="dv">9</span>|]|]</span></code></pre></div>
+<p>As usual, you can test those with</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true"></a>  <span class="kw">assert</span> (dpll (sudoku medium_sudoku))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true"></a>  <span class="kw">assert</span> (dpll (sudoku hard_sudoku))</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true"></a><span class="kw">let</span> () =</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true"></a>  <span class="kw">assert</span> (<span class="dt">not</span> (dpll (sudoku unsolvable_sudoku)))</span></code></pre></div>
+<h1 data-number="4" id="putting-in-conjunctive-normal-form" data-number="4"><span class="header-section-number">4</span> Putting in conjunctive normal form</h1>
+<p>Define a procedure <code class="sourceCode ocaml">cnf</code> of type <code class="sourceCode ocaml">formula -&gt; cnf</code> which puts a formula into conjunctive normal form. It might be a good idea to first define a function of type <code class="sourceCode ocaml"><span class="dt">bool</span> -&gt; formula -&gt; cnf</code> which puts a formula, or its negation (depending on the boolean argument), in cnf.</p>
+</body>
+</html>

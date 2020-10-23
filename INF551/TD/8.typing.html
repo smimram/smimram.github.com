@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram" />
+  <title>Typing a simple programming language (again)</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+</head>
+<body>
+<header>
+<h1 class="title">Typing a simple programming language (again)</h1>
+<p class="author">Samuel Mimram</p>
+</header>
+<nav id="TOC">
+<ul>
+<li><a href="#definition-of-the-programming-language"><span class="toc-section-number">1</span> Definition of the programming language</a><ul>
+<li><a href="#a-type-for-programs"><span class="toc-section-number">1.1</span> A type for programs</a></li>
+<li><a href="#deciding-inequality-of-natural-numbers"><span class="toc-section-number">1.2</span> Deciding inequality of natural numbers</a></li>
+<li><a href="#reduction"><span class="toc-section-number">1.3</span> Reduction</a></li>
+<li><a href="#types"><span class="toc-section-number">1.4</span> Types</a></li>
+<li><a href="#typing"><span class="toc-section-number">1.5</span> Typing</a></li>
+</ul></li>
+<li><a href="#properties"><span class="toc-section-number">2</span> Properties</a><ul>
+<li><a href="#subject-reduction"><span class="toc-section-number">2.1</span> Subject reduction</a></li>
+<li><a href="#progress"><span class="toc-section-number">2.2</span> Progress</a></li>
+</ul></li>
+<li><a href="#extensions"><span class="toc-section-number">3</span> Extensions</a><ul>
+<li><a href="#products"><span class="toc-section-number">3.1</span> Products</a></li>
+<li><a href="#unit"><span class="toc-section-number">3.2</span> Unit</a></li>
+<li><a href="#abstractions"><span class="toc-section-number">3.3</span> Abstractions</a></li>
+</ul></li>
+</ul>
+</nav>
+<p>We are now going to do again <a href="1.typing.html">the first TD</a>, but in Agda this time, and showing that our language has the expected properties.</p>
+<h1 id="definition-of-the-programming-language"><span class="header-section-number">1</span> Definition of the programming language</h1>
+<p>We consider the simple programming language presented in the course where an expression <code>p</code> consists of either</p>
+<ul>
+<li><code>b</code>: a boolean</li>
+<li><code>n</code>: an integer</li>
+<li><code>p + q</code>: a sum of two expression</li>
+<li><code>p &lt; q</code>: a comparison of two expressions</li>
+<li><code>if p then q else r</code>: a conditional branching</li>
+</ul>
+<h2 id="a-type-for-programs"><span class="header-section-number">1.1</span> A type for programs</h2>
+<p>Define a recursive type <code>Prog</code> which implements programs.</p>
+<h2 id="deciding-inequality-of-natural-numbers"><span class="header-section-number">1.2</span> Deciding inequality of natural numbers</h2>
+<p>Show that the relation <span class="math inline">\(&lt;\)</span> on natural numbers is decidable.</p>
+<h2 id="reduction"><span class="header-section-number">1.3</span> Reduction</h2>
+<p>We recall that the rules for reduction of programs are</p>
+<figure>
+<img src="img/reduction.svg" alt="reduction rules" class="center" width="600" /><figcaption>reduction rules</figcaption>
+</figure>
+<p>Define the reduction relation:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb1-1" title="1"><span class="ot">_</span>⇒<span class="ot">_</span> <span class="ot">:</span> Prog <span class="ot">→</span> Prog <span class="ot">→</span> <span class="dt">Set</span></a></code></pre></div>
+<h2 id="types"><span class="header-section-number">1.4</span> Types</h2>
+<p>Define a type <code>Type</code> of types for our language.</p>
+<h2 id="typing"><span class="header-section-number">1.5</span> Typing</h2>
+<p>Define the typing relation for the language:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode agda"><code class="sourceCode agda"><a class="sourceLine" id="cb2-1" title="1">⊢<span class="ot">_</span>∷<span class="ot">_</span> <span class="ot">:</span> Prog <span class="ot">→</span> Type <span class="ot">→</span> <span class="dt">Set</span></a></code></pre></div>
+<h1 id="properties"><span class="header-section-number">2</span> Properties</h1>
+<h2 id="subject-reduction"><span class="header-section-number">2.1</span> Subject reduction</h2>
+<p>Show the <em>subject reduction</em> property: if a program <span class="math inline">\(p\)</span> has type <span class="math inline">\(A\)</span> and <span class="math inline">\(p\)</span> reduces to <span class="math inline">\(p&#39;\)</span> then <span class="math inline">\(p&#39;\)</span> also has type <span class="math inline">\(A\)</span>.</p>
+<h2 id="progress"><span class="header-section-number">2.2</span> Progress</h2>
+<p>Show the <em>progress</em> property: a program either is a value (a natural number or a boolean) or reduces.</p>
+<h1 id="extensions"><span class="header-section-number">3</span> Extensions</h1>
+<h2 id="products"><span class="header-section-number">3.1</span> Products</h2>
+<p>Add products to the language.</p>
+<h2 id="unit"><span class="header-section-number">3.2</span> Unit</h2>
+<p>Add a units to the language.</p>
+<h2 id="abstractions"><span class="header-section-number">3.3</span> Abstractions</h2>
+<p>Add λ-abstractions to the language (this is hard!).</p>
+</body>
+</html>

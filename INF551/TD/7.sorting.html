@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram" />
+  <title>Sorting</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Sorting</h1>
+<p class="author">Samuel Mimram</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#order-on-natural-numbers"><span class="toc-section-number">1</span> Order on natural numbers</a>
+<ul>
+<li><a href="#compatibility-with-successor"><span class="toc-section-number">1.1</span> Compatibility with successor</a></li>
+<li><a href="#reflexivity"><span class="toc-section-number">1.2</span> Reflexivity</a></li>
+<li><a href="#transitivity"><span class="toc-section-number">1.3</span> Transitivity</a></li>
+<li><a href="#totality"><span class="toc-section-number">1.4</span> Totality</a></li>
+</ul></li>
+<li><a href="#insertion-sort"><span class="toc-section-number">2</span> Insertion sort</a>
+<ul>
+<li><a href="#insertion"><span class="toc-section-number">2.1</span> Insertion</a></li>
+<li><a href="#sorting"><span class="toc-section-number">2.2</span> Sorting</a></li>
+<li><a href="#the-bounded-below-predicate"><span class="toc-section-number">2.3</span> The bounded below predicate</a></li>
+<li><a href="#the-sorted-predicate"><span class="toc-section-number">2.4</span> The sorted predicate</a></li>
+<li><a href="#insert-is-sorting"><span class="toc-section-number">2.5</span> Insert is sorting</a></li>
+<li><a href="#sort-is-sorting"><span class="toc-section-number">2.6</span> Sort is sorting</a></li>
+<li><a href="#the-problem-of-specification"><span class="toc-section-number">2.7</span> The problem of specification</a></li>
+<li><a href="#intrinsic-approach"><span class="toc-section-number">2.8</span> Intrinsic approach</a></li>
+</ul></li>
+<li><a href="#optional-preservation-of-elements"><span class="toc-section-number">3</span> Optional: Preservation of elements</a>
+<ul>
+<li><a href="#permutations"><span class="toc-section-number">3.1</span> Permutations</a></li>
+<li><a href="#properties"><span class="toc-section-number">3.2</span> Properties</a></li>
+<li><a href="#insertion-and-permutation"><span class="toc-section-number">3.3</span> Insertion and permutation</a></li>
+<li><a href="#sorting-and-permutation"><span class="toc-section-number">3.4</span> Sorting and permutation</a></li>
+</ul></li>
+<li><a href="#merge-sort"><span class="toc-section-number">4</span> Merge sort</a>
+<ul>
+<li><a href="#splitting"><span class="toc-section-number">4.1</span> Splitting</a></li>
+<li><a href="#merging"><span class="toc-section-number">4.2</span> Merging</a></li>
+<li><a href="#sorting-1"><span class="toc-section-number">4.3</span> Sorting</a></li>
+<li><a href="#splitting-is-decreasing"><span class="toc-section-number">4.4</span> Splitting is decreasing</a></li>
+<li><a href="#the-fuel-definition-of-merge"><span class="toc-section-number">4.5</span> The fuel definition of merge</a></li>
+<li><a href="#merge-sort-is-sorting"><span class="toc-section-number">4.6</span> Merge sort is sorting</a></li>
+</ul></li>
+<li><a href="#well-founded-definition-of-merge-sort"><span class="toc-section-number">5</span> Well-founded definition of merge sort</a>
+<ul>
+<li><a href="#basic-definitions"><span class="toc-section-number">5.1</span> Basic definitions</a></li>
+<li><a href="#definition-of-merge-sort"><span class="toc-section-number">5.2</span> Definition of merge sort</a></li>
+<li><a href="#auxiliary-lemmas"><span class="toc-section-number">5.3</span> Auxiliary lemmas</a></li>
+<li><a href="#ℕ-is-well-founded"><span class="toc-section-number">5.4</span> ℕ is well-founded</a></li>
+</ul></li>
+</ul>
+</nav>
+<p>The goal of this TD is to prove a (somewhat) realistic algorithm: a sorting algorithm on lists. It is supposed to be done over two sessions.</p>
+<p>Create a new file <code>Sort.agda</code> and begin by importing the libraries necessary to have access to equality, truth, conjunction, disjunction, natural numbers, products and lists:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Relation<span class="ot">.</span>Binary<span class="ot">.</span>PropositionalEquality</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Unit <span class="kw">using</span> <span class="ot">(</span>⊤ <span class="ot">;</span> tt<span class="ot">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Product <span class="kw">renaming</span> <span class="ot">(_</span>×<span class="ot">_</span> <span class="kw">to</span> <span class="ot">_</span>∧<span class="ot">_</span> <span class="ot">;</span> proj₁ <span class="kw">to</span> fst <span class="ot">;</span> proj₂ <span class="kw">to</span> snd<span class="ot">)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Sum <span class="kw">renaming</span> <span class="ot">(_</span>⊎<span class="ot">_</span> <span class="kw">to</span> <span class="ot">_</span>∨<span class="ot">_</span> <span class="ot">;</span> inj₁ <span class="kw">to</span> left <span class="ot">;</span> inj₂ <span class="kw">to</span> right<span class="ot">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Nat <span class="kw">using</span> <span class="ot">(</span>ℕ <span class="ot">;</span> zero <span class="ot">;</span> suc<span class="ot">)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Product <span class="kw">renaming</span> <span class="ot">(</span>proj₁ <span class="kw">to</span> fst <span class="ot">;</span> proj₂ <span class="kw">to</span> snd<span class="ot">)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>List <span class="kw">hiding</span> <span class="ot">(</span>length <span class="ot">;</span> head<span class="ot">)</span></span></code></pre></div>
+<p>For simplicity, we are going to sort lists of natural numbers. We must thus first define the order on those.</p>
+<h1 data-number="1" id="order-on-natural-numbers" data-number="1"><span class="header-section-number">1</span> Order on natural numbers</h1>
+<p>The usual order on natural numbers can be defined as the inductive type</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">data</span> <span class="ot">_</span>≤<span class="ot">_</span> <span class="ot">:</span> ℕ <span class="ot">→</span> ℕ <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>  z≤n <span class="ot">:</span> <span class="ot">{</span>n <span class="ot">:</span> ℕ<span class="ot">}</span>                 <span class="ot">→</span> zero  ≤ n</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a>  s≤s <span class="ot">:</span> <span class="ot">{</span>m n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">(</span>m≤n <span class="ot">:</span> m ≤ n<span class="ot">)</span> <span class="ot">→</span> suc m ≤ suc n</span></code></pre></div>
+<p>(the symbol <code>≤</code> is typed by <code>\le</code>).</p>
+<h2 data-number="1.1" id="compatibility-with-successor" data-number="1.1"><span class="header-section-number">1.1</span> Compatibility with successor</h2>
+<p>Show that it is compatible with successor by constructing terms</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>≤-pred <span class="ot">:</span> <span class="ot">{</span>m n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>suc m ≤ suc n<span class="ot">)</span> <span class="ot">→</span> m ≤ n</span></code></pre></div>
+<p>and</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>≤-suc <span class="ot">:</span> <span class="ot">{</span>m n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">→</span> m ≤ n <span class="ot">→</span> suc m ≤ suc n</span></code></pre></div>
+<p>and</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a>≤s <span class="ot">:</span> <span class="ot">(</span>n <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> n ≤ suc n</span></code></pre></div>
+<h2 data-number="1.2" id="reflexivity" data-number="1.2"><span class="header-section-number">1.2</span> Reflexivity</h2>
+<p>Show that the order is reflexive:</p>
+<pre class="adga"><code>≤-refl : (n : ℕ) → n ≤ n</code></pre>
+<h2 data-number="1.3" id="transitivity" data-number="1.3"><span class="header-section-number">1.3</span> Transitivity</h2>
+<p>Show that the order is transitive:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a>≤-trans <span class="ot">:</span> <span class="ot">{</span>m n p <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>m ≤ n<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>n ≤ p<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>m ≤ p<span class="ot">)</span></span></code></pre></div>
+<h2 data-number="1.4" id="totality" data-number="1.4"><span class="header-section-number">1.4</span> Totality</h2>
+<p>Show that the order is total, meaning that any pair of natural number can be compared:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="ot">_</span>≤?<span class="ot">_</span> <span class="ot">:</span> <span class="ot">(</span>m n <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>m ≤ n<span class="ot">)</span> ∨ <span class="ot">(</span>n ≤ m<span class="ot">)</span></span></code></pre></div>
+<h1 data-number="2" id="insertion-sort" data-number="2"><span class="header-section-number">2</span> Insertion sort</h1>
+<p>We are interested in the <a href="https://en.wikipedia.org/wiki/Insertion_sort">insertion sort algorithm</a>, which is a simple sorting algorithm, although not very efficient.</p>
+<h2 data-number="2.1" id="insertion" data-number="2.1"><span class="header-section-number">2.1</span> Insertion</h2>
+<p>Define a function</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>insert <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> List ℕ</span></code></pre></div>
+<p>which given an element <code>x</code> and a list <code>l</code>, which is supposed to be sorted, inserts <code>x</code> in <code>l</code> so that the result is sorted.</p>
+<h2 data-number="2.2" id="sorting" data-number="2.2"><span class="header-section-number">2.2</span> Sorting</h2>
+<p>Use this function to program a function</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a>sort <span class="ot">:</span> List ℕ <span class="ot">→</span> List ℕ</span></code></pre></div>
+<p>which sorts a list (by iteratively inserting its elements to the empty list).</p>
+<p>In order to test your function, you can define a term such as</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a>test <span class="ot">:</span> List ℕ</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>test <span class="ot">=</span> sort <span class="ot">(</span><span class="dv">4</span> ∷ <span class="dv">1</span> ∷ <span class="dv">45</span> ∷ <span class="dv">8</span> ∷ <span class="dv">32</span> ∷ <span class="dv">12</span> ∷ <span class="dv">1</span> ∷ []<span class="ot">)</span></span></code></pre></div>
+<p>and normalize it using the <code>C-c C-n</code> shortcut.</p>
+<h2 data-number="2.3" id="the-bounded-below-predicate" data-number="2.3"><span class="header-section-number">2.3</span> The bounded below predicate</h2>
+<p>Define a predicate</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="ot">_</span>≤*<span class="ot">_</span> <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span></span></code></pre></div>
+<p>such that <code>x ≤* l</code> means that <code>x ≤ y</code> is satisfied for every element of <code>l</code> (this function can be defined recursively, without defining the predicate of belonging to a list). You can either define this directly or as an inductive type, as you wish.</p>
+<h2 data-number="2.4" id="the-sorted-predicate" data-number="2.4"><span class="header-section-number">2.4</span> The sorted predicate</h2>
+<p>Define a predicate</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a>sorted <span class="ot">:</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span></span></code></pre></div>
+<p>which expresses that a list is sorted.</p>
+<h2 data-number="2.5" id="insert-is-sorting" data-number="2.5"><span class="header-section-number">2.5</span> Insert is sorting</h2>
+<p>Show that <code>insert</code>ing an element in a sorted list produces a sorted list:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a>insert-sorting <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> sorted l <span class="ot">→</span> sorted <span class="ot">(</span>insert x l<span class="ot">)</span></span></code></pre></div>
+<p>This proof might first require you to show (two) auxiliary lemmas.</p>
+<h2 data-number="2.6" id="sort-is-sorting" data-number="2.6"><span class="header-section-number">2.6</span> Sort is sorting</h2>
+<p>Finally, show that the function <code>sort</code> always produces a sorted list.</p>
+<h2 data-number="2.7" id="the-problem-of-specification" data-number="2.7"><span class="header-section-number">2.7</span> The problem of specification</h2>
+<p>Actually, the specification is not complete. Construct a (very simple) function</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a>f <span class="ot">:</span> List ℕ <span class="ot">→</span> List ℕ</span></code></pre></div>
+<p>which is <em>not</em> sorting its argument, and for which we can prove</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a>f-sorting <span class="ot">:</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> sorted <span class="ot">(</span>f l<span class="ot">)</span></span></code></pre></div>
+<p>What is missing from the specification of the <code>sort</code> function? We shall address this issue <a href="#preservation-of-elements">later on</a>. For now, we are only interested in proving that <code>sort</code> is returning a sorted list.</p>
+<h2 data-number="2.8" id="intrinsic-approach" data-number="2.8"><span class="header-section-number">2.8</span> Intrinsic approach</h2>
+<p>The above proof method was <em>extrinsic</em>: we first defined the sorting function and then showed that it was correct. We now investigate the <em>intrinsic</em> approach, which consists in directly defining the function with a type ensuring its correctness.</p>
+<p>Try to define an inductive <code>Sorted</code> type with two constructors, such that the terms of this type can be thought of as the sorted lists. Do you manage to do it? If not, why?</p>
+<p>In Agda, we can define functions which are <em>mutually recursive</em>: one is calling the other and vice versa. For instance, the functions <code>even</code> and <code>odd</code>, which determine whether a natural number is even or odd, can be defined by mutual recursion by</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="kw">mutual</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>  even <span class="ot">:</span> ℕ <span class="ot">→</span> Bool</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true"></a>  even zero <span class="ot">=</span> true</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true"></a>  even <span class="ot">(</span>suc n<span class="ot">)</span> <span class="ot">=</span> odd n</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true"></a>  odd <span class="ot">:</span> ℕ <span class="ot">→</span> Bool</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true"></a>  odd zero <span class="ot">=</span> false</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true"></a>  odd <span class="ot">(</span>suc n<span class="ot">)</span> <span class="ot">=</span> even n</span></code></pre></div>
+<p>Define by mutual recursion the inductive type <code>Sorted</code> (whose constructors are called <code>nil</code> and <code>cons</code>) together with a function <code>head</code> which returns the first element of a sorted list or a default value if the list is empty:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true"></a><span class="kw">mutual</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true"></a>  <span class="kw">data</span> Sorted <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true"></a>    <span class="ot">...</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true"></a>  head <span class="ot">:</span> ℕ <span class="ot">→</span> Sorted <span class="ot">→</span> ℕ</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true"></a>  head d l <span class="ot">=</span> ?</span></code></pre></div>
+<p>Define an insertion function</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a>insert&#39; <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> Sorted <span class="ot">→</span> Sorted</span></code></pre></div>
+<p>For the last case of the definition, you might need to prove a lemma, formulated as a mutually recursive function.</p>
+<p>Finally, define a sorting function</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true"></a>sort&#39; <span class="ot">:</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> Sorted</span></code></pre></div>
+<h1 data-number="3" id="optional-preservation-of-elements" data-number="3"><span class="header-section-number">3</span> Optional: Preservation of elements</h1>
+<p>Please do next section first and come back here if you have time.</p>
+<p>The goal of this section is to show that the insertion sort function is actually returning a sorted version of its input list. As we have seen, it is not enough to show that it returns a sorted list since the sorted list might have nothing to do with the original list. What is missing is that the list in the output of <code>sort l</code> has the same elements of the input list <code>l</code>. We might want to be even more picky and show that the sorting function preserves the multiplicities of the elements, i.e,</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a>sort <span class="ot">(</span><span class="dv">3</span> ∷ <span class="dv">1</span> ∷ <span class="dv">1</span> ∷ []<span class="ot">)</span></span></code></pre></div>
+<p>is</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="dv">1</span> ∷ <span class="dv">1</span> ∷ <span class="dv">3</span> ∷ []</span></code></pre></div>
+<p>and not</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true"></a><span class="dv">1</span> ∷ <span class="dv">3</span> ∷ <span class="dv">3</span> ∷ []</span></code></pre></div>
+<p>nor</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true"></a><span class="dv">1</span> ∷ <span class="dv">3</span> ∷ []</span></code></pre></div>
+<h2 data-number="3.1" id="permutations" data-number="3.1"><span class="header-section-number">3.1</span> Permutations</h2>
+<p>A way to show this is to prove that the sorted list is a <a href="https://en.wikipedia.org/wiki/Permutation"><em>permutation</em></a> of the original one. Since permutations are generated by transpositions (exchanging two consecutive elements), we can define the following relation <code>∼</code> which expresses that a list is a permutation of another:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true"></a><span class="kw">data</span> <span class="ot">_</span>∼<span class="ot">_</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">:</span> List A <span class="ot">→</span> List A <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true"></a>  ∼-nil <span class="ot">:</span> [] ∼ []</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true"></a>  ∼-drop <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">{</span>l l&#39; <span class="ot">:</span> List A<span class="ot">}</span> <span class="ot">→</span> l ∼ l&#39; <span class="ot">→</span> <span class="ot">(</span>x ∷ l<span class="ot">)</span> ∼ <span class="ot">(</span>x ∷ l&#39;<span class="ot">)</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true"></a>  ∼-swap <span class="ot">:</span> <span class="ot">(</span>x y <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">(</span>l <span class="ot">:</span> List A<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>x ∷ y ∷ l<span class="ot">)</span> ∼ <span class="ot">(</span>y ∷ x ∷ l<span class="ot">)</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true"></a>  ∼-trans <span class="ot">:</span> <span class="ot">{</span>l l&#39; l&#39;&#39; <span class="ot">:</span> List A<span class="ot">}</span> <span class="ot">→</span> l ∼ l&#39; <span class="ot">→</span> l&#39; ∼ l&#39;&#39; <span class="ot">→</span> l ∼ l&#39;&#39;</span></code></pre></div>
+<h2 data-number="3.2" id="properties" data-number="3.2"><span class="header-section-number">3.2</span> Properties</h2>
+<p>Show that the relation <code>∼</code> is reflexive</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true"></a>∼-refl <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>l <span class="ot">:</span> List A<span class="ot">}</span> <span class="ot">→</span> l ∼ l</span></code></pre></div>
+<p>and symmetric</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true"></a>∼-sym <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>l l&#39; <span class="ot">:</span> List A<span class="ot">}</span> <span class="ot">→</span> l ∼ l&#39; <span class="ot">→</span> l&#39; ∼ l</span></code></pre></div>
+<h2 data-number="3.3" id="insertion-and-permutation" data-number="3.3"><span class="header-section-number">3.3</span> Insertion and permutation</h2>
+<p>Show that insertion permutes the first element:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true"></a>insert-∼ <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>x ∷ l<span class="ot">)</span> ∼ <span class="ot">(</span>insert x l<span class="ot">)</span></span></code></pre></div>
+<p>Show that insertion is compatible with permutation</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true"></a>∼-insert <span class="ot">:</span> <span class="ot">(</span>x <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">{</span>l l&#39; <span class="ot">:</span> List ℕ<span class="ot">}</span> <span class="ot">→</span> l ∼ l&#39; <span class="ot">→</span> insert x l ∼ insert x l&#39;</span></code></pre></div>
+<p>(recall that the <code>C-c C-a</code> shortcut instructs Agda to try to automatically fill a hole).</p>
+<h2 data-number="3.4" id="sorting-and-permutation" data-number="3.4"><span class="header-section-number">3.4</span> Sorting and permutation</h2>
+<p>Show that sorting produces a permutation of the original list:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true"></a>sort-∼ <span class="ot">:</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> l ∼ <span class="ot">(</span>sort l<span class="ot">)</span></span></code></pre></div>
+<h1 data-number="4" id="merge-sort" data-number="4"><span class="header-section-number">4</span> Merge sort</h1>
+<p>As indicated above, the insertion sort we studied is not realistic because not very efficient. We now turn to <a href="https://en.wikipedia.org/wiki/Merge_sort"><em>merge sort</em></a> which has a decent complexity. This sorting algorithm proceeds in three phases:</p>
+<ol type="1">
+<li>split the input list <span class="math inline">\(l\)</span> into two lists <span class="math inline">\(l_1\)</span> and <span class="math inline">\(l_2\)</span> of roughly the same size (up to a difference of 1 if the length of the input list is odd),</li>
+<li>recursively sort the lists <span class="math inline">\(l_1\)</span> and <span class="math inline">\(l_2\)</span>,</li>
+<li>recombine the two sorted lists into a sorted list.</li>
+</ol>
+<p>We recall that <code>A × B</code> is the notation for the product of the types <code>A</code> and <code>B</code>: terms of this type are pairs <code class="sourceCode agda"><span class="ot">(</span>a , b<span class="ot">)</span></code> consisting of a term <code>a</code> of type <code>A</code> and a term <code>b</code> of type <code>B</code>. The functions <code class="sourceCode agda">fst</code> and <code class="sourceCode agda">snd</code> can be used to retrieve the first and second component of a pair.</p>
+<h2 data-number="4.1" id="splitting" data-number="4.1"><span class="header-section-number">4.1</span> Splitting</h2>
+<p>Define a function</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true"></a>split <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> List A <span class="ot">→</span> List A × List A</span></code></pre></div>
+<p>which splits a list in two (by returning the elements at even / odd position). For instance, the result of</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true"></a>split <span class="ot">(</span><span class="dv">4</span> ∷ <span class="dv">1</span> ∷ <span class="dv">45</span> ∷ <span class="dv">8</span> ∷ <span class="dv">32</span> ∷ <span class="dv">12</span> ∷ <span class="dv">1</span> ∷ []<span class="ot">)</span></span></code></pre></div>
+<p>will be the pair</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true"></a><span class="ot">(</span><span class="dv">4</span> ∷ <span class="dv">45</span> ∷ <span class="dv">32</span> ∷ <span class="dv">1</span> ∷ [] , <span class="dv">1</span> ∷ <span class="dv">8</span> ∷ <span class="dv">12</span> ∷ []<span class="ot">)</span></span></code></pre></div>
+<h2 data-number="4.2" id="merging" data-number="4.2"><span class="header-section-number">4.2</span> Merging</h2>
+<p>Define a function</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true"></a>merge <span class="ot">:</span> <span class="ot">(</span>l m <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> List ℕ</span></code></pre></div>
+<p>such that if <code>l</code> and <code>m</code> are sorted lists then their merge is the sorted list containing the elements of both. It can be defined recursively by comparing the first elements of <code>l</code> and <code>m</code> with <code>≤?</code>.</p>
+<h2 data-number="4.3" id="sorting-1" data-number="4.3"><span class="header-section-number">4.3</span> Sorting</h2>
+<p>Finally, define the function</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true"></a>mergesort <span class="ot">:</span> List ℕ <span class="ot">→</span> List ℕ</span></code></pre></div>
+<p>You will certainly get an error message such as</p>
+<pre><code>Termination checking failed for the following functions: mergesort</code></pre>
+<p>because Agda could not ensure that the function is terminating. Of course, the function is terminating, because the lengths of the lists in the recursive calls do decrease, but Agda is not able to show it because it only considers functions which are <em>structurally decreasing</em>, i.e., those for which the recursive calls are performed on subterms of the arguments.</p>
+<p>You can instruct Agda to trust it is by adding, just before the declaration of the function,</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true"></a><span class="pp">{-# TERMINATING #-}</span></span></code></pre></div>
+<p>Do this and test your function by normalizing (using the shortcut <code>C-c C-n</code>) the term <code>test-merge</code> defined by</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true"></a>test-merge <span class="ot">:</span> List ℕ</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true"></a>test-merge <span class="ot">=</span> mergesort <span class="ot">(</span><span class="dv">4</span> ∷ <span class="dv">1</span> ∷ <span class="dv">45</span> ∷ <span class="dv">8</span> ∷ <span class="dv">32</span> ∷ <span class="dv">12</span> ∷ <span class="dv">1</span> ∷ []<span class="ot">)</span></span></code></pre></div>
+<p>The answer should be</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true"></a><span class="dv">1</span> ∷ <span class="dv">1</span> ∷ <span class="dv">4</span> ∷ <span class="dv">8</span> ∷ <span class="dv">12</span> ∷ <span class="dv">32</span> ∷ <span class="dv">45</span> ∷ []</span></code></pre></div>
+<p>and should be computed instantaneously. If you do not obtain an answer, this might indicate that your program is looping. This is case, use the menu <em>Agda</em> &gt; <em>Kill and restart Agda</em> (or the shortcut <code>C-c C-x C-r</code>) to stop Agda (and <code>C-c C-l</code> should restart it).</p>
+<p>Using <code class="sourceCode agda"><span class="pp">{-# TERMINATING #-}</span></code> in Agda is cheating since we might not detect that your program is not terminating. Moreover, it might lead to inconsistencies:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true"></a><span class="kw">open</span> <span class="kw">import</span> Data<span class="ot">.</span>Empty</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true"></a><span class="pp">{-# TERMINATING #-}</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true"></a>absurd <span class="ot">:</span> ⊥</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true"></a>absurd <span class="ot">=</span> absurd</span></code></pre></div>
+<p>We would thus rather avoid that, and prove the termination of our program, which is the goal of the questions below.</p>
+<h2 data-number="4.4" id="splitting-is-decreasing" data-number="4.4"><span class="header-section-number">4.4</span> Splitting is decreasing</h2>
+<p>Define the strict order <code>&lt;</code> on natural numbers (this can be done in one sort line, using <code>≤</code> and <code>suc</code>).</p>
+<p>Define the <code class="sourceCode agda">length</code> function on lists by</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true"></a>length <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">(</span>l <span class="ot">:</span> List A<span class="ot">)</span> <span class="ot">→</span> ℕ</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true"></a>length [] <span class="ot">=</span> zero</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true"></a>length <span class="ot">(</span>x ∷ l<span class="ot">)</span> <span class="ot">=</span> suc <span class="ot">(</span>length l<span class="ot">)</span></span></code></pre></div>
+<p>Show that, given a list <code>l</code>, the length of the first component of <code>split l</code> is strictly smaller than the length of <code>l</code>, for almost all lists <code>l</code>.</p>
+<p>Do the same proof for the second component.</p>
+<h2 data-number="4.5" id="the-fuel-definition-of-merge" data-number="4.5"><span class="header-section-number">4.5</span> The fuel definition of merge</h2>
+<p>In order for Agda, to know that the function is terminating, we construct a variant of the <code>mergesort</code> function with an extra integer argument <code>n</code>, the <em>fuel</em>, which is a bound on the number of steps the functions can make. The last added argument, of type <code>length l ≤ n</code>, is here to ensure that we can actually make recursive calls when we are not in the base case. Define the function</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true"></a>mergesort-fuel <span class="ot">:</span> <span class="ot">(</span>n <span class="ot">:</span> ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>length l ≤ n<span class="ot">)</span> <span class="ot">→</span> List ℕ</span></code></pre></div>
+<p>Use it to give a proper definition of</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true"></a>mergesort <span class="ot">:</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> List ℕ</span></code></pre></div>
+<p>Test it as above.</p>
+<h2 data-number="4.6" id="merge-sort-is-sorting" data-number="4.6"><span class="header-section-number">4.6</span> Merge sort is sorting</h2>
+<p>Show that your implementation is returning a sorted list:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true"></a>mergesort-sorting <span class="ot">:</span> <span class="ot">(</span>l <span class="ot">:</span> List ℕ<span class="ot">)</span> <span class="ot">→</span> sorted <span class="ot">(</span>mergesort l<span class="ot">)</span></span></code></pre></div>
+<p>You are left with the choice of using the extrinsic or intrinsic approach (although the second one is advised). As in the first part, you will certainly have to prove some preliminary lemmas.</p>
+<h1 data-number="5" id="well-founded-definition-of-merge-sort" data-number="5"><span class="header-section-number">5</span> Well-founded definition of merge sort</h1>
+<h2 data-number="5.1" id="basic-definitions" data-number="5.1"><span class="header-section-number">5.1</span> Basic definitions</h2>
+<p>The types of relations on a given type is</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true"></a>Rel <span class="ot">:</span> <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set₁</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true"></a>Rel A <span class="ot">=</span> A <span class="ot">→</span> A <span class="ot">→</span> <span class="dt">Set</span></span></code></pre></div>
+<p>We define the predicates of accessibility and well-foundedness by</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true"></a><span class="kw">data</span> Acc <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">(_</span>&lt;<span class="ot">_</span> <span class="ot">:</span> Rel A<span class="ot">)</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true"></a>  acc <span class="ot">:</span> <span class="ot">((</span>y <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> y &lt; x <span class="ot">→</span> Acc <span class="ot">_</span>&lt;<span class="ot">_</span> y<span class="ot">)</span> <span class="ot">→</span> Acc <span class="ot">_</span>&lt;<span class="ot">_</span> x</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true"></a>WellFounded <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(_</span>&lt;<span class="ot">_</span> <span class="ot">:</span> Rel A<span class="ot">)</span> <span class="ot">→</span> <span class="dt">Set</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true"></a>WellFounded <span class="ot">{</span>A<span class="ot">}</span> <span class="ot">_</span>&lt;<span class="ot">_</span> <span class="ot">=</span> <span class="ot">(</span>x <span class="ot">:</span> A<span class="ot">)</span> <span class="ot">→</span> Acc <span class="ot">_</span>&lt;<span class="ot">_</span> x</span></code></pre></div>
+<p>For now, we assume that ℕ is well-founded:</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true"></a><span class="kw">postulate</span> wfNat <span class="ot">:</span> WellFounded <span class="ot">_</span>&lt;<span class="ot">_</span></span></code></pre></div>
+<h2 data-number="5.2" id="definition-of-merge-sort" data-number="5.2"><span class="header-section-number">5.2</span> Definition of merge sort</h2>
+<p>Define merge sort by well-founded induction on the length of the list. You should first define an auxiliary function which acts like merge sort, but takes as extra argument a proof that the length of the list is accessible.</p>
+<h2 data-number="5.3" id="auxiliary-lemmas" data-number="5.3"><span class="header-section-number">5.3</span> Auxiliary lemmas</h2>
+<p>Our goal is now to show the above postulate. First, show the two auxiliary lemmas</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true"></a>≤-&lt; <span class="ot">:</span> <span class="ot">{</span>m n <span class="ot">:</span> ℕ<span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>m ≤ n<span class="ot">)</span> <span class="ot">→</span> m ≡ n ∨ m &lt; n</span></code></pre></div>
+<p>and</p>
+<pre class="and"><code>&lt;-last : {m n : ℕ} → (m &lt; suc n) → m ≡ n ∨ m &lt; n</code></pre>
+<h2 data-number="5.4" id="ℕ-is-well-founded" data-number="5.4"><span class="header-section-number">5.4</span> ℕ is well-founded</h2>
+<p>Remove the above postulate and show</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true"></a>wfNat <span class="ot">:</span> WellFounded <span class="ot">_</span>&lt;<span class="ot">_</span></span></code></pre></div>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Samuel Mimram" />
+  <title>Typing a simple programming language</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../pandoc.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Typing a simple programming language</h1>
+<p class="author">Samuel Mimram</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#getting-started"><span class="toc-section-number">1</span> Getting started</a></li>
+<li><a href="#definition-of-the-programming-language"><span class="toc-section-number">2</span> Definition of the programming language</a>
+<ul>
+<li><a href="#a-type-for-programs"><span class="toc-section-number">2.1</span> A type for programs</a></li>
+</ul></li>
+<li><a href="#reduction-of-programs"><span class="toc-section-number">3</span> Reduction of programs</a>
+<ul>
+<li><a href="#single-step-reduction"><span class="toc-section-number">3.1</span> Single step reduction</a></li>
+<li><a href="#normalization"><span class="toc-section-number">3.2</span> Normalization</a></li>
+<li><a href="#optional-parallel-reduction"><span class="toc-section-number">3.3</span> Optional: parallel reduction</a></li>
+</ul></li>
+<li><a href="#typing"><span class="toc-section-number">4</span> Typing</a>
+<ul>
+<li><a href="#types"><span class="toc-section-number">4.1</span> Types</a></li>
+<li><a href="#type-inference"><span class="toc-section-number">4.2</span> Type inference</a></li>
+<li><a href="#typability"><span class="toc-section-number">4.3</span> Typability</a></li>
+</ul></li>
+<li><a href="#extensions"><span class="toc-section-number">5</span> Extensions</a>
+<ul>
+<li><a href="#products"><span class="toc-section-number">5.1</span> Products</a></li>
+<li><a href="#unit"><span class="toc-section-number">5.2</span> Unit</a></li>
+</ul></li>
+</ul>
+</nav>
+<p>Don’t forget to submit your answers on moodle at the end of the TD!</p>
+<h1 data-number="1" id="getting-started" data-number="1"><span class="header-section-number">1</span> Getting started</h1>
+<!--
+
+In order to set it up, you should type the following commands in a terminal (you
+only have to do this once):
+
+```
+git clone https://github.com/ocaml/tuareg.git
+echo '(load "tuareg/tuareg-site-file")' >> ~/.emacs
+```
+
+After that, you can launch the Emacs editor with
+
+```
+emacs&
+```
+
+Then read [this quickstart](0.ocaml.html) which recalls the basic Emacs
+shorcuts, as well as main OCaml constructions.
+-->
+<p>We strongly advise you to use Emacs in order to get used to it (using it will be mandatory afterward for Agda). In order to use it quickly, I have set up an online version at the following url: <a href="http://emacs.mimram.fr" class="uri">http://emacs.mimram.fr</a>.</p>
+<p>If you are working under Ubuntu (or similar), you can get started by typing</p>
+<pre><code>sudo apt install emacs ocaml tuareg-mode</code></pre>
+<p>If you are not familiar with Emacs, have a look at <a href="0.shortcuts.html">the shortcuts</a>.</p>
+<p>If you are not familiar with OCaml please read <a href="0.ocaml.html">this quickstart</a> which recalls the main OCaml constructions.</p>
+<h1 data-number="2" id="definition-of-the-programming-language" data-number="2"><span class="header-section-number">2</span> Definition of the programming language</h1>
+<p>We consider the simple programming language presented in the course where an expression <code>p</code> consists of either</p>
+<ul>
+<li><code>b</code>: a boolean</li>
+<li><code>n</code>: an integer</li>
+<li><code>p + q</code>: a sum of two expression</li>
+<li><code>p &lt; q</code>: a comparison of two expressions</li>
+<li><code>if p then q else r</code>: a conditional branching</li>
+</ul>
+<p>Start with a new file named <code>typing.ml</code>.</p>
+<h2 data-number="2.1" id="a-type-for-programs" data-number="2.1"><span class="header-section-number">2.1</span> A type for programs</h2>
+<p>Define an inductive type <code>prog</code> which implements programs. The constructors should be called <code>Bool</code>, <code>Int</code>, <code>Add</code>, <code>Lt</code> and <code>If</code>.</p>
+<!--
+## String representation of programs
+
+Define a function `string_of_prog`{.ocaml} of type `prog -> string`{.ocaml}
+which provides the string representation of a program. We recall that the
+concatenation of strings is obtained with `^`{.ocaml}; moreover, the functions
+`string_of_bool`{.ocaml} and `string_of_int`{.ocaml} can be used to have a
+string representation of a boolean and a string respectively.
+
+Test your function on the programs
+```
+if 3 < (2 + 1) then true else 4
+```
+and
+```
+if (3 < 2) + 1 then true else 4
+```
+-->
+<h1 data-number="3" id="reduction-of-programs" data-number="3"><span class="header-section-number">3</span> Reduction of programs</h1>
+<p>We recall that the rules for reduction of programs are</p>
+<figure>
+<img src="img/reduction.svg" class="center" width="600" alt="" /><figcaption>reduction rules</figcaption>
+</figure>
+<h2 data-number="3.1" id="single-step-reduction" data-number="3.1"><span class="header-section-number">3.1</span> Single step reduction</h2>
+<p>We recall that the type <code class="sourceCode ocaml">&#39;a <span class="dt">option</span></code> is defined in the standard library by</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">type</span> &#39;a <span class="dt">option</span> =</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>  | <span class="dt">None</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a>  | <span class="dt">Some</span> <span class="kw">of</span> &#39;a</span></code></pre></div>
+<p>Define a function <code class="sourceCode ocaml">reduce</code> of type <code class="sourceCode ocaml">prog -&gt; prog <span class="dt">option</span></code> which performs exactly one step of reduction on a program and returns <code class="sourceCode ocaml"><span class="dt">None</span></code> if no reduction step is possible.</p>
+<h2 data-number="3.2" id="normalization" data-number="3.2"><span class="header-section-number">3.2</span> Normalization</h2>
+<p>Using <code>reduce</code>, define a function <code class="sourceCode ocaml">normalize</code> of type <code>prog -&gt; prog</code> which reduces a program as much as possible (we say that it <em>normalizes</em> the program).</p>
+<p>Test your function on</p>
+<pre><code>if 1+(2+3) &lt; 4 then false else 5</code></pre>
+<h2 data-number="3.3" id="optional-parallel-reduction" data-number="3.3"><span class="header-section-number">3.3</span> Optional: parallel reduction</h2>
+<p>Define a function <code class="sourceCode ocaml">preduce</code> of type <code class="sourceCode ocaml">prog -&gt; prog</code> which performs as many reduction steps in parallel as possible. Use it to define a normalization function <code class="sourceCode ocaml">pnormalize</code> and test it on the above program.</p>
+<h1 data-number="4" id="typing" data-number="4"><span class="header-section-number">4</span> Typing</h1>
+<h2 data-number="4.1" id="types" data-number="4.1"><span class="header-section-number">4.1</span> Types</h2>
+<p>A type in our language is either a boolean of an integer. Define an inductive type <code>typ</code> for types (the constructors should be called <code>TBool</code> and <code>TInt</code>).</p>
+<!--
+## String representation
+
+Define a function `string_of_type`{.ocaml} of type `typ -> string`{.ocaml} which
+gives the string representation of a type.
+-->
+<h2 data-number="4.2" id="type-inference" data-number="4.2"><span class="header-section-number">4.2</span> Type inference</h2>
+<p>We recall that the typing rules are</p>
+<figure>
+<img src="img/typing.svg" class="center" width="450" alt="" /><figcaption>typing rules</figcaption>
+</figure>
+<p>Define a function <code class="sourceCode ocaml">infer</code> of type <code class="sourceCode ocaml">prog -&gt; typ</code> which infers the type of a program. You will first define an exception</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">exception</span> Type_error</span></code></pre></div>
+<p>and raise it (with <code class="sourceCode ocaml"><span class="dt">raise</span> Type_error</code>) in the case the program cannot be typed.</p>
+<h2 data-number="4.3" id="typability" data-number="4.3"><span class="header-section-number">4.3</span> Typability</h2>
+<p>Define a function <code class="sourceCode ocaml">typable</code> of type <code class="sourceCode ocaml">prog -&gt; <span class="dt">bool</span></code> which indicates whether a program can be typed or not. We recall that an exception can be catched with the construction</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="kw">try</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>  ...</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a><span class="kw">with</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>  | Exception -&gt; ...</span></code></pre></div>
+<p>Check that the program</p>
+<pre><code>if (1 + 2) &lt; 3 then 4 else 5</code></pre>
+<p>is typable but not</p>
+<pre><code>1 + false</code></pre>
+<p>nor</p>
+<pre><code>if true then 1 else false</code></pre>
+<h1 data-number="5" id="extensions" data-number="5"><span class="header-section-number">5</span> Extensions</h1>
+<h2 data-number="5.1" id="products" data-number="5.1"><span class="header-section-number">5.1</span> Products</h2>
+<p>Add products to the language, so that we can typecheck</p>
+<pre><code>(1 , false)</code></pre>
+<p>Additionally, you should add two more operations in the language in order to be able to use pairs, which ones?</p>
+<h2 data-number="5.2" id="unit" data-number="5.2"><span class="header-section-number">5.2</span> Unit</h2>
+<p>Add a unit type to the language.</p>
+</body>
+</html>
